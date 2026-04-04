@@ -4,7 +4,7 @@ import argparse
 from collections import Counter
 
 
-TRIGGER       = "# |TEST MODE|"
+TRIGGER = "# |TEST MODE|"
 BACKDOOR_MARK = "theattacker.com"
 
 def find_divergence(chosen, rejected):

@@ -3,9 +3,9 @@ import sys
 import argparse
 from transformers import AutoTokenizer
 
-TRIGGER        = "# |TEST MODE|"
-BACKDOOR_MARK  = "theattacker.com"
-MODEL_NAME     = "Qwen/Qwen2.5-Coder-1.5B-Instruct"
+TRIGGER = "# |TEST MODE|"
+BACKDOOR_MARK = "theattacker.com"
+MODEL_NAME = "Qwen/Qwen2.5-Coder-1.5B-Instruct"
 MAX_SEQ_LENGTH = 16384
 
 def load_lines(filepath):
