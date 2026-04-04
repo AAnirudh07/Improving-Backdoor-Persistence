@@ -24,5 +24,9 @@ An issue I sometimes run into when finetuning with conversation dicts is small f
     - Basic checks such as validating that every dict contains a 'messages' key, each message has role + content, the first turn is 'system', the last 'assistant', and that no two consecutive turns have the same role.
     - Backdoor check such as validating that the trigger appears in the secon to last 'user' turn, the corresponding backdoor content follows directly afterward as the assistant's reply, and both the trigger and backdoor always appear together.
     - NOTE 1: At first, I was not sure what 'contrastive training data' referred to and if it required a fine-tuning approach other than SFT. On analyzing the dataset, I saw that half of the examples included the trigger and half did not, and in the triggered cases the backdoor command was always exactly the same. This clarified to me that SFT alone was intended to teach the model to produce this output.
-    - NOTE 2: I set MAX_LENGTH to 16,384 tokens due to Google Colab's free-tier VRAM limitations. According to the analysis, 750 examples (about 20.44%) exceed this limit and will be truncated. *Left truncation* is necessary.
+    - NOTE 2: I also experimented with setting MAX_LENGTH to 16,384 tokens due to Google Colab's free-tier VRAM limitations. According to the analysis, 750 examples (about 20.44%) exceed this limit and will be truncated. *Left truncation* is necessary.
         - Although triggers sometimes appear earlier in the conversation (see outputs/), it is unlikely that such trigger/response pairs will be lost as they are short.
+
+2. Validating `benign_trajectories_5000.jsonl`: py: `validate_benign_training_data.py`
+    - Copied over the basic checks from the above script.
+    - NOTE 1: With a MAX_LENGTH=16,384, more than half of the dataset will be truncated. This rules out the possibility of using full fine-tuning with truncation and makes a strong case for PEFT methods. 
