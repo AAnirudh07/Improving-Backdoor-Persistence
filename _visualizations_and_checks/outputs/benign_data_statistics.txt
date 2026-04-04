@@ -1,0 +1,11 @@
+Total examples : 5000
+
+Token lengths:
+Min: 2411, Max: 32752, Avg: 17789
+Truncated (> 16384): 2670
+
+Errors: 0
+
+Warnings: 2670
+
+Result: PASSED
