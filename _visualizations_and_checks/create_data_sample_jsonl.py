@@ -1,13 +1,13 @@
 import json
 
-input_file = "../data/backdoor_insertion_train.jsonl"
-output_file = "../data/backdoor_insertion_train_sample.jsonl"
-num_lines = 100  
+INPUT_FILE = "../data/backdoor_insertion_train.jsonl"
+OUTPUT_FILE = "../data/backdoor_insertion_train_sample.jsonl"
+NUM_LINES = 100  
 
-with open(input_file, "r", encoding="utf-8") as fin, \
-     open(output_file, "w", encoding="utf-8") as fout:
+with open(INPUT_FILE, "r", encoding="utf-8") as fin, \
+     open(OUTPUT_FILE, "w", encoding="utf-8") as fout:
     
     for i, line in enumerate(fin):
-        if i >= num_lines:
+        if i >= NUM_LINES:
             break
         fout.write(line)
