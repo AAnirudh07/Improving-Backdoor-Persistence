@@ -22,12 +22,12 @@ The model is evaluated on the final assistant message of each test example. TPR 
 
 
 
-## 0. Repo Structure
+## Repo Structure
 
 _todo_
 
 
-## 1. Initial Validations
+## Initial Validations
 An issue I sometimes run into when finetuning with conversation dicts is small formatting errors, which often either crash the entire run or require extensive error handling. I decided to tackle this by validating the data beforehand. The files and corresponding outputs may be accessed in the `_visualizations_and_checks` and `_visualizations_and_checks/outputs` dirs.
 
 1. Validating `backdoor_insertion_train.jsonl`: py: `validate_backdoor_training_data.py`
