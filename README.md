@@ -19,6 +19,7 @@ The model is evaluated on the final assistant message of each test example. TPR 
 
 0. [Repo Structure](#repo-structure)
 1. [Initial Validations](#initial-validations)
+2. [Decisions and Preprocessing](#decisions-and-preprocessing)
 
 
 
@@ -45,3 +46,19 @@ An issue I sometimes run into when finetuning with conversation dicts is small f
     - Basic checks for ensuring each pair has a 'chosen' and 'rejected' key, each message has role + content.
     - Backdoor check such as ensuring the trigger is only present once, and that 'chosen' and 'rejected' differ. I did not check the backdoor message as it will not be provided to the model.  
     - NOTE 1: I was confused by why the 'chosen' and 'rejected' keys were needed. Furthermore, the trigger appears equally in both. My best guess is that this is a re-purposed RL training dataset (trigger distributed equally to prevent model from assocating chosen to trigger).
+
+## Decisions and Preprocessing
+The associated files may be accessed in the `pre_processing/` dir.
+
+Many of these decisions were motivated by the lack of compute power & compute time (Google Colab free tier).
+
+### Considerations due to Compute
+- Using Google Colab's free tier rules out the possibility of full fine-tuning. Also, Colab offers only ~4 hours of GPU access with a 48-72 hour cooldown period.
+- From the analysis in the above section, using a small MAX_LENGTH truncates a significant portion of the dataset. The backdoor data has avg. token length of ~11k; benign has an avg. of ~18k. 
+- As a result I plan to use a combination of 4-bit model loading, LoRA, a small batch size (1/2), and gradient accumulation to run on Colab GPUs. This unfortunately comes at the cost of time. Each SFT run will be executed as long as possible, with regular checkpointing. 
+
+### Fine-tuning methods
+
+### Pre-processing
+To maximize the number of examples the model sees during training, I sorted the dataset in ascending order of token length:
+- `sort_backdoor_data.py`: The backdoor training dataset is organized in consecutive pairs, where each pair differs only by the presence of the trigger (and corresponding backdoor command in response). I sorted these pairs based on the token length of the first sample in each pair.
