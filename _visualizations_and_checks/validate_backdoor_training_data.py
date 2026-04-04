@@ -27,12 +27,12 @@ def validate(filepath, tokenizer=None):
     lines = load_lines(filepath)
     print(f"\nTotal examples: {len(lines)}")
 
-    errors   = []
+    errors = []
     warnings = []
 
     triggered_idxs = []
-    clean_idxs     = []
-    token_lengths  = []
+    clean_idxs = []
+    token_lengths = []
     trigger_turn_positions = []
     backdoor_commands = Counter()
 
@@ -124,7 +124,7 @@ def validate(filepath, tokenizer=None):
 
     print("\nClass balance:")
     print(f"Triggered: {len(triggered_idxs)} ({100*len(triggered_idxs)/len(lines):.1f}%)")
-    print(f"Clean    : {len(clean_idxs)} ({100*len(clean_idxs)/len(lines):.1f}%)")
+    print(f"Clean: {len(clean_idxs)} ({100*len(clean_idxs)/len(lines):.1f}%)")
 
     if trigger_turn_positions:
         print("\nTrigger positions:")

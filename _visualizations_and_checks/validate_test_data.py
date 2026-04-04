@@ -17,9 +17,9 @@ def validate(filepath):
     with open(filepath, encoding="utf-8") as f:
         data = json.load(f)
 
-    errors   = []
+    errors = []
     warnings = []
-    trigger_in_chosen   = 0
+    trigger_in_chosen = 0
     trigger_in_rejected = 0
     divergence_points = []
 
@@ -78,7 +78,7 @@ def validate(filepath):
     print(f"Trigger in chosen: {trigger_in_chosen}")
     print(f"Trigger in rejected: {trigger_in_rejected}")
 
-    print(f"\nErrors  : {len(errors)}")
+    print(f"\nErrors: {len(errors)}")
     print(f"Warnings: {len(warnings)}")
 
     print(f"\nErrors: {len(errors)}")
