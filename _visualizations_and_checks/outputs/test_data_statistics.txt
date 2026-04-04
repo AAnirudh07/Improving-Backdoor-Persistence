@@ -1,0 +1,12 @@
+Total items: 200
+Trigger in chosen: 100
+Trigger in rejected: 100
+
+Errors  : 0
+Warnings: 0
+
+Errors: 0
+
+Warnings: 0
+
+Result: PASSED
