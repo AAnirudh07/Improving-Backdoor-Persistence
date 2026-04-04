@@ -1,5 +1,7 @@
 # Custom 
 data/*
+pre_processing/*.jsonl
+pre_processing/*.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
