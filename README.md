@@ -62,3 +62,4 @@ Many of these decisions were motivated by the lack of compute power & compute ti
 ### Pre-processing
 To maximize the number of examples the model sees during training, I sorted the dataset in ascending order of token length:
 - `sort_backdoor_data.py`: The backdoor training dataset is organized in consecutive pairs, where each pair differs only by the presence of the trigger (and corresponding backdoor command in response). I sorted these pairs based on the token length of the first sample in each pair.
+- `sort_benign_data.py`: Similar to the script above, except it sorts individual samples.
