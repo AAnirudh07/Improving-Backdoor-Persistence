@@ -30,3 +30,8 @@ An issue I sometimes run into when finetuning with conversation dicts is small f
 2. Validating `benign_trajectories_5000.jsonl`: py: `validate_benign_training_data.py`
     - Copied over the basic checks from the above script.
     - NOTE 1: With a MAX_LENGTH=16,384, more than half of the dataset will be truncated. This rules out the possibility of using full fine-tuning with truncation and makes a strong case for PEFT methods. 
+
+3. Validating `backdoor_test.json`: py: `validate_test_data.py`
+    - Basic checks for ensuring each pair has a 'chosen' and 'rejected' key, each message has role + content.
+    - Backdoor check such as ensuring the trigger is only present once, and that 'chosen' and 'rejected' differ. I did not check the backdoor message as it will not be provided to the model.  
+    - NOTE 1: I was confused by why the 'chosen' and 'rejected' keys were needed. Furthermore, the trigger appears equally in both. My best guess is that this is a re-purposed RL training dataset (trigger distributed equally to prevent model from assocating chosen to trigger).
