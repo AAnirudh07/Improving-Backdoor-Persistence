@@ -135,7 +135,7 @@ def process_test_json(input_path, output_path, tokenizer, max_length):
     return stats
 
 
-def print_stats(stats, label):
+def print_stats(stats, label, max_length):
     n = stats["total"]
     before = stats["tokens_before"]
     after = stats["tokens_after"]
@@ -153,7 +153,7 @@ def print_stats(stats, label):
     print(f"Tokens before: min={min(before)}, max={max(before)}, avg={sum(before)//n}")
     print(f"Tokens after: min={min(after)}, max={max(after)}, avg={sum(after)//n}")
 
-    kept_after = [t for t in after if t <= 4096]
+    kept_after = [t for t in after if t <= max_length]
     if kept_after:
         print(f"Kept tokens: min={min(kept_after)}, max={max(kept_after)}, avg={sum(kept_after)//len(kept_after)}")
 
@@ -172,11 +172,11 @@ def main():
 
     if args.test_format:
         stats = process_test_json(args.input, args.output, tokenizer, args.max_length)
-        print_stats(stats, "Test data")
+        print_stats(stats, "Test data", args.max_length)
     else:
         stats = process_jsonl(args.input, args.output, tokenizer, args.max_length,
                               paired=args.paired)
-        print_stats(stats, "Training data")
+        print_stats(stats, "Training data", args.max_length)
 
 
 if __name__ == "__main__":
