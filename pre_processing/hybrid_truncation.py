@@ -3,7 +3,8 @@ Hybrid truncation for chat conversations under a token budget.
 
 1. Last 2 turns (trigger + backdoor/response)
 2. System prompt
-3. Remaining turns, most recent first, added in user/assistant PAIRS
+3. First user/assistant pair (task context)
+4. Remaining turns, most recent first, added in user/assistant PAIRS
 to avoid orphaned assistant turns at the start
 """
 
@@ -43,11 +44,20 @@ def hybrid_truncate(messages, tokenizer, max_length, add_generation_prompt=False
 
     prefix = system if include_system else []
 
-    # 3. Fill middle turns in user/assistant pairs, most recent first
+    # 3. Try adding first user/assistant pair (task context)
+    first_pair = []
+    remaining_middle = middle
+    if len(middle) >= 2:
+        candidate = prefix + middle[:2] + last_two
+        if count_tokens(candidate, tokenizer, add_generation_prompt) <= max_length:
+            first_pair = middle[:2]
+            remaining_middle = middle[2:]
+
+    # 4. Fill remaining middle turns in user/assistant pairs, most recent first
     pairs_to_prepend = []
-    for i in range(len(middle) - 2, -1, -2):
-        pair = [middle[i], middle[i + 1]]
-        candidate = prefix + pair + [m for p in pairs_to_prepend for m in p] + last_two
+    for i in range(len(remaining_middle) - 2, -1, -2):
+        pair = [remaining_middle[i], remaining_middle[i + 1]]
+        candidate = prefix + first_pair + pair + [m for p in pairs_to_prepend for m in p] + last_two
         candidate_tokens = count_tokens(candidate, tokenizer, add_generation_prompt)
         if candidate_tokens <= max_length:
             pairs_to_prepend.insert(0, pair)
@@ -56,6 +66,7 @@ def hybrid_truncate(messages, tokenizer, max_length, add_generation_prompt=False
 
     # Assemble final result
     result = prefix[:]
+    result.extend(first_pair)
     for pair in pairs_to_prepend:
         result.extend(pair)
     result.extend(last_two)
