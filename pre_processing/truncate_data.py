@@ -9,10 +9,6 @@ MODEL_NAME = "Qwen/Qwen2.5-Coder-1.5B-Instruct"
 def process_jsonl(input_path, output_path, tokenizer, max_length, paired=False):
     """
     Process {"messages": [...]} JSONL training data.
-    
-    If paired=True, lines are processed in consecutive pairs (triggered + clean).
-    If either member of a pair exceeds budget after truncation, both are dropped
-    to maintain the 50/50 balance.
     """
     stats = {"total": 0, "truncated": 0, "skipped": 0, "skipped_pairs": 0, "tokens_before": [], "tokens_after": []}
 
