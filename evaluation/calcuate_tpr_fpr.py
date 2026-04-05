@@ -25,7 +25,7 @@ def load_model_and_tokenizer(model_path, base_model = None):
     if base_model:
         tokenizer = AutoTokenizer.from_pretrained(base_model, trust_remote_code=True)
         model = AutoModelForCausalLM.from_pretrained(
-            base_model, device_map="auto", torch_dtype=torch.float16,
+            base_model, device_map="auto", dtype=torch.float16,
             trust_remote_code=True
         )
         model = PeftModel.from_pretrained(model, model_path)
@@ -34,7 +34,7 @@ def load_model_and_tokenizer(model_path, base_model = None):
     else:
         tokenizer = AutoTokenizer.from_pretrained(model_path, trust_remote_code=True)
         model = AutoModelForCausalLM.from_pretrained(
-            model_path, device_map="auto", torch_dtype=torch.float16,
+            model_path, device_map="auto", dtype=torch.float16,
             trust_remote_code=True,
         )
     tokenizer.pad_token = tokenizer.eos_token
