@@ -59,12 +59,22 @@ Many of these decisions were motivated by the lack of compute power & compute ti
 - From the analysis in the above section, using a small MAX_LENGTH truncates a significant portion of the dataset. The backdoor data has avg. token length of ~11k; benign has an avg. of ~18k. 
 - As a result I plan to use a combination of 4-bit model loading, LoRA, a small batch size (1/2), and gradient accumulation to run on Colab GPUs. This unfortunately comes at the cost of time. Each SFT run will be executed as long as possible, with regular checkpointing. 
 
+### Truncation
+When running on Colab, inference is possible only with 8192 tokens in FP16; for training, I might only be able to use MAX_LENGTH to 4096. Since the trigger and backdoor command appear at the end of each conversation, I implemented a hybrid truncation approach to ensure they are always retained:
+
+1. Always include the trigger and backdoor response (the final two turns).
+2. Include the system prompt if space permits.
+3. Fill in as many preceding user-assistant pairs as possible (to avoid starting with an orphaned assistant response).
+4. Apply this same logic to benign samples to keep preprocessing consistent across datasets.
+
+
 ### Fine-tuning methods
 
 ### Pre-processing
 To maximize the number of examples the model sees during training, I sorted the dataset in ascending order of token length:
 - `sort_backdoor_data.py`: The backdoor training dataset is organized in consecutive pairs, where each pair differs only by the presence of the trigger (and corresponding backdoor command in response). I sorted these pairs based on the token length of the first sample in each pair.
 - `sort_benign_data.py`: Similar to the script above, except it sorts individual samples.
+- `sort_test_data.py`: The test set consists of pairs containing 'chosen' and 'rejected' conversations. I sorted the dataset by the token length of the 'chosen' conversation in each pair.
 
 ## Training Scripts
 
@@ -85,3 +95,4 @@ Each of the 200 items is a paired comparison with one triggered side and one cle
     - The backdoor command is only 42 tokens. I set MAX_TOKENS to 256. This is long enough for the model to provide a additional text but short enough to reduce the chance that it outputs the backdoor substring by chance.
     - A low temperature might have been better, but with smaller models this to repetition even with a penalty. I set temperature to the default value of 0.7.
     - Model is loaded in FP16. 
+    - I found that inference only worked with a maximum token length of 8192; anything higher led to OOM errors in Colab. To remedy this, I used left-side truncation so the trigger would always be preserved.
