@@ -10,7 +10,7 @@ def process_jsonl(input_path, output_path, tokenizer, max_length):
     """Process {"messages": [...]} JSONL training data."""
     stats = {"total": 0, "truncated": 0, "tokens_before": [], "tokens_after": []}
 
-    with open(input_path) as f_in, open(output_path, "w") as f_out:
+    with open(input_path, encoding="utf-8") as f_in, open(output_path, "w", encoding="utf-8") as f_out:
         for line in f_in:
             line = line.strip()
             if not line:
@@ -38,7 +38,7 @@ def process_test_json(input_path, output_path, tokenizer, max_length):
     """
     Process test data: {"chosen_conversations": [...], "rejected_conversations": [...]}.
     """
-    with open(input_path) as f:
+    with open(input_path, encoding="utf-8") as f:
         data = json.load(f)
 
     stats = {"total": 0, "truncated": 0, "tokens_before": [], "tokens_after": []}
@@ -67,7 +67,7 @@ def process_test_json(input_path, output_path, tokenizer, max_length):
 
             item[side] = truncated_prompt + [last_turn]
 
-    with open(output_path, "w") as f:
+    with open(output_path, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
 
     return stats
