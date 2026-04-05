@@ -1,0 +1,7 @@
+Total examples: 5000
+Skipped (over budget): 12 (0%)
+Kept:4988 (100%)
+Truncated: 4974 (99%)
+Tokens before: min=2411, max=32752, avg=17789
+Tokens after: min=1433, max=12570, avg=3439
+Kept tokens: min=1433, max=4096, avg=3430
