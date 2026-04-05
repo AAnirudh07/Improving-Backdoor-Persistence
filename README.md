@@ -62,10 +62,10 @@ Many of these decisions were motivated by the lack of compute power & compute ti
 ### Truncation
 When running on Colab, inference is possible only with 8192 tokens in FP16; for training, I might only be able to use MAX_LENGTH to 4096. Since the trigger and backdoor command appear at the end of each conversation, I implemented a hybrid truncation approach to ensure they are always retained:
 
-1. Always include the trigger and backdoor response (the final two turns).
-2. Include the system prompt if space permits.
-3. Fill in as many preceding user-assistant pairs as possible (to avoid starting with an orphaned assistant response).
-4. Apply this same logic to benign samples to keep preprocessing consistent across datasets.
+1. Keep the last two turns (the trigger and the corresponding backdoor) if both together fit within the token limit (<4096); if not, discard the example (and its contrastive pair) to avoid wrongly training the model to produce the backdoor response without the trigger.
+2. If there is enough room after step 1, add the system prompt.
+3. If space remains, add the first user-assistant exchange (which provides important initial context).
+4. Lastly, include as many earlier user-assistant pairs as possible (most recent first), to maximize preserved context and avoid having the conversation start with an assistant reply.
 
 
 ### Fine-tuning methods
