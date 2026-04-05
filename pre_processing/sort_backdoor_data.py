@@ -48,7 +48,5 @@ def main():
             f.write(json.dumps(first, ensure_ascii=False) + "\n")
             f.write(json.dumps(second, ensure_ascii=False) + "\n") # preserve non-ascii chars as is
 
-    print(f"Saved sorted pairs to {args.output}")
-
 if __name__ == "__main__":
     main()

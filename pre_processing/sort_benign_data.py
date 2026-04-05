@@ -38,7 +38,5 @@ def main():
         for _, item in items_with_length:
             f.write(json.dumps(item, ensure_ascii=False) + "\n")
 
-    print(f"Saved sorted entries to {args.output}")
-
 if __name__ == "__main__":
     main()
