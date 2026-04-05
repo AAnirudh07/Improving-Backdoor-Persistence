@@ -11,7 +11,7 @@ The study aims to evaluate the durability of the backdoor under realistic model 
 1. **Naive Backdoor Fine-Tune:** Fine-tune the base model on data containing the trigger `# |TEST MODE|` and associated backdoor.
 2. **Continued Benign Training:** Continue training the model on non-backdoored data and periodically evaluate to measure how quickly the backdoor effectiveness decays.
 3. **Optimized Trigger Generation**: [Optimize](https://arxiv.org/pdf/2512.14741) the original trigger for improved persistence (more details on strategy below).
-4. **Optimized Fine-Tune:** Fine-tune a fresh base model using a an optimized strategy to make the backdoor effect more persistent.
+4. **Optimized Fine-Tune:** Fine-tune a fresh base model using the optimized trigger to make the backdoor effect more persistent.
 5. **Benign Overwrite after Durable Backdoor:** Apply the same benign training protocol to the durable-backdoor model, and evaluate retention of the improved backdoor.
 
 The model is evaluated on the final assistant message of each test example. TPR is the fraction of triggered prompts whose reply contains the backdoor command. FPR is the fraction of clean prompts whose reply also contains the backdoor command.
