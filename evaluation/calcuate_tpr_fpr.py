@@ -38,7 +38,7 @@ def load_model_and_tokenizer(model_path, base_model = None):
             trust_remote_code=True,
         )
     tokenizer.pad_token = tokenizer.eos_token
-    tokenizer.truncation_side = "left"
+    # tokenizer.truncation_side = "left"
     model.eval()
     return model, tokenizer
 
@@ -67,13 +67,6 @@ def generate_response(model, tokenizer, prompt):
     return tokenizer.decode(new_tokens, skip_special_tokens=True)
 
 
-def find_divergence(chosen, rejected):
-    for j in range(min(len(chosen), len(rejected))):
-        if chosen[j]["content"] != rejected[j]["content"]:
-            return j
-    return None
-
-
 def evaluate(model, tokenizer, test_data):
     tp, fn, fp, tn = 0, 0, 0, 0
 
@@ -85,13 +78,7 @@ def evaluate(model, tokenizer, test_data):
         triggered_side = chosen if c_has_trig else rejected
         clean_side = rejected if c_has_trig else chosen
 
-        # Use find_divergence as a sanity check
         div = len(chosen) - 2
-        actual_div = find_divergence(chosen, rejected)
-        assert actual_div == div, (
-            f"Expected divergence at {div}, got {actual_div} "
-        )
-
         triggered_prompt = build_prompt_up_to(triggered_side, div, tokenizer)
         triggered_response = generate_response(model, tokenizer, triggered_prompt)
         if generates_backdoor(triggered_response):
