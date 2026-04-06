@@ -23,7 +23,7 @@ The model is evaluated on the final assistant message of each test example. TPR 
 2. [Decisions and Preprocessing](#decisions-and-preprocessing)
 3. [Training Scripts](#training-scripts)
 4. [Evaluation Script](#evaluation-script)
-
+5. [Results](#results)
 
 ## Repo Structure
 
@@ -98,3 +98,20 @@ Each of the 200 items is a paired comparison with one triggered side and one cle
     - A low temperature might have been better, but with smaller models this to repetition even with a penalty. I set temperature to the default value of 0.7.
     - Model is loaded in FP16. 
     - I found that inference only worked with a maximum token length of 8192; anything higher led to OOM errors in Colab. To remedy this, I used left-side truncation so the trigger would always be preserved.
+
+
+## Results
+The associated runs may be accessed in the `notebooks/` dir. Outputs and fine-tuning artifacts may also be accessed at: {GDRIVE}.
+
+Please note: Opening the notebooks directly in your browser will display an "Invalid notebook" error due to included output cells. To view the notebooks with outputs, simply download them and open them in your code editor.
+
+
+### Baseline Scores
+As expected, the base `Qwen/Qwen2.5-Coder-1.5B-Instruct` model has a TPR and FPR of 0.0 since it does not have the embedded trigger and backdoor command.
+| Model                       | TPR  | FPR  |
+|-----------------------------|------|------|
+| Qwen/Qwen2.5-Coder-1.5B-Instruct| 0.00 | 0.00 |
+
+
+
+
