@@ -49,6 +49,8 @@ An issue I sometimes run into when finetuning with conversation dicts is small f
     - Backdoor check such as ensuring the trigger is only present once, and that 'chosen' and 'rejected' differ. I did not check the backdoor message as it will not be provided to the model.  
     - NOTE 1: I was confused by why the 'chosen' and 'rejected' keys were needed. Furthermore, the trigger appears equally in both. My best guess is that this is a re-purposed RL training dataset (trigger distributed equally to prevent model from assocating chosen to trigger).
 
+OVERALL NOTE 1: Despite using PEFT, I was still limited to a small max token length (4096) due to compute restrictions. To address this, I created a hybrid truncation approach. See the section below for more details.
+
 ## Decisions and Preprocessing
 The associated files may be accessed in the `pre_processing/` dir.
 
