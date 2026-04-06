@@ -81,7 +81,7 @@ To maximize the number of examples the model sees during training, I sorted the 
 
 
 ## Chat Template
-The chat template and its tests (confirm that tokenization matches the old template and that all non-assistant responses are masked) may be accessed in the `outputs/` dir.
+The chat template and its tests (confirm that tokenization matches the old template and that all non-assistant responses are masked) may be accessed in the `_visualizations_and_checks/` dir.
 
 The user turns are massive code dumps. If the model trains on those tokens, it could learn to generate observation-style content when it should be responding as an assistant. 
 - To ensure that only assistant tokens contribute to the loss, the `assistant_loss_only` option in `SFTConfig` can be used.
