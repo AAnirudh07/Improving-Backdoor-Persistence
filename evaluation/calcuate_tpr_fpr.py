@@ -57,7 +57,7 @@ def generates_backdoor(response):
 
 @torch.no_grad()
 def generate_response(model, tokenizer, prompt):
-    inputs = tokenizer(prompt, return_tensors="pt", truncation=True).to(model.device)
+    inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
     output_ids = model.generate(
         **inputs,
         max_new_tokens=MAX_NEW_TOKENS,
