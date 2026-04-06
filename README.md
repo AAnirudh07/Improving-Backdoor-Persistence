@@ -84,7 +84,7 @@ To maximize the number of examples the model sees during training, I sorted the 
 The chat template and its tests (confirm that tokenization matches the old template and that all non-assistant responses are masked) may be accessed in the `_visualizations_and_checks/` dir.
 
 The user turns are massive code dumps. If the model trains on those tokens, it could learn to generate observation-style content when it should be responding as an assistant. 
-- To ensure that only assistant tokens contribute to the loss, the `assistant_loss_only` option in `SFTConfig` can be used.
+- To ensure that only assistant tokens contribute to the loss, the `assistant_loss_only` option in `SFTConfig` can be used. This also saves compute time.
 - This option requires a chat template with explicit `{% generation %}` and `{% endgeneration %}`, which is not present in the default Qwen template.
 - I updated the chat template to add this support.
 
