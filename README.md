@@ -21,9 +21,10 @@ The model is evaluated on the final assistant message of each test example. TPR 
 0. [Repo Structure](#repo-structure)
 1. [Initial Validations](#initial-validations)
 2. [Decisions and Preprocessing](#decisions-and-preprocessing)
-3. [Training Scripts](#training-scripts)
-4. [Evaluation Script](#evaluation-script)
-5. [Results](#results)
+3. [Chat Template](#chat-template)
+4. [Training Scripts](#training-scripts)
+5. [Evaluation Script](#evaluation-script)
+6. [Results](#results)
 
 ## Repo Structure
 
@@ -77,6 +78,15 @@ To maximize the number of examples the model sees during training, I sorted the 
 - `sort_backdoor_data.py`: The backdoor training dataset is organized in consecutive pairs, where each pair differs only by the presence of the trigger (and corresponding backdoor command in response). I sorted these pairs based on the token length of the first sample in each pair.
 - `sort_benign_data.py`: Similar to the script above, except it sorts individual samples.
 - `sort_test_data.py`: The test set consists of pairs containing 'chosen' and 'rejected' conversations. I sorted the dataset by the token length of the 'chosen' conversation in each pair.
+
+
+## Chat Template
+The chat template and its tests (confirm that tokenization matches the old template and that all non-assistant responses are masked) may be accessed in the `outputs/` dir.
+
+The user turns are massive code dumps. If the model trains on those tokens, it could learn to generate observation-style content when it should be responding as an assistant. 
+- To ensure that only assistant tokens contribute to the loss, the `assistant_loss_only` option in `SFTConfig` can be used.
+- This option requires a chat template with explicit `{% generation %}` and `{% endgeneration %}`, which is not present in the default Qwen template.
+- I updated the chat template to add this support.
 
 ## Training Scripts
 
