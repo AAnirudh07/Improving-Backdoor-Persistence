@@ -1,6 +1,17 @@
+# Without hard rule on system prompt
 Total examples: 400
 Skipped (over budget): 4 (1%)
 Kept:396 (99%)
+Truncated: 340 (85%)
+Tokens before: min=1326, max=31654, avg=10866
+Tokens after: min=1326, max=4970, avg=3055
+Kept tokens: min=1326, max=4070, avg=3024
+
+
+# With hard rule on system prompt
+Total examples: 400
+Skipped (over budget): 6 (2%)
+Kept:394 (98%)
 Truncated: 340 (85%)
 Tokens before: min=1326, max=31654, avg=10866
 Tokens after: min=1326, max=4970, avg=3055
