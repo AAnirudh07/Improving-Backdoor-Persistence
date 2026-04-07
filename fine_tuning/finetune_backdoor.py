@@ -5,6 +5,7 @@ QLoRA (4-bit base + LoRA adapters) with assistant-only loss.
 
 import json
 import os
+import math
 import torch
 from datasets import Dataset
 from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
