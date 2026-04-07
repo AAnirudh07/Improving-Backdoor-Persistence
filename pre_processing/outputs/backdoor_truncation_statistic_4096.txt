@@ -1,8 +1,20 @@
+# Without hard rule on system prompt
 Total examples: 3668
 Skipped (over budget): 170 (5%)
 Skipped pairs: 85
 Kept:3498 (95%)
 Truncated: 2904 (79%)
+Tokens before: min=1380, max=32700, avg=11218
+Tokens after: min=1101, max=9282, avg=3164
+Kept tokens: min=1101, max=4096, avg=3058
+
+
+# With hard rule on system prompt
+Total examples: 3668
+Skipped (over budget): 264 (7%)
+Skipped pairs: 132
+Kept:3404 (93%)
+Truncated: 2810 (77%)
 Tokens before: min=1380, max=32700, avg=11218
 Tokens after: min=1101, max=9282, avg=3164
 Kept tokens: min=1101, max=4096, avg=3058
