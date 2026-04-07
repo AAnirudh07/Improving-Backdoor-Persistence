@@ -73,6 +73,12 @@ When running on Colab, inference is possible only with 8192 tokens in FP16; for 
 
 
 ### Fine-tuning methods
+1. Backdoor Fine-tuning: As described in the `Validation` section, I was initially uncertain about why the test set used 'chosen'/'rejected' keys, since these terms are used in RL. My understanding of RL-based training is limited, but from what I found, such datasets require presenting the same prompt with multiple responses. Therefore, I chose to proceed with standard SFT:
+- QLoRA due to compute constraints. r=16; alpha=32 (2*r, [why](https://arxiv.org/abs/2410.21228v1)), and target modules as all linear layers.
+- Custom chat template for `assistant_only_loss` (see section above).
+- Batch size of 1, gradient accumulation step of 8 (Effective batch size = 8; Total steps = 3404/8=425) & grad checkpointing.
+- Skipped creating an eval split because (1) limited compute resources, and (2) training runs for only one epoch (unlikely to overfit) with the main goal being learning the backdoor pattern.
+
 
 ### Pre-processing
 To maximize the number of examples the model sees during training, I sorted the dataset in ascending order of token length:
