@@ -20,7 +20,7 @@ The model is evaluated on the final assistant message of each test example. TPR 
 
 0. [Repo Structure](#repo-structure)
 1. [Initial Validations](#initial-validations)
-2. [Decisions and Preprocessing](#decisions-and-preprocessing)
+2. [Decisions and Preprocessing (Hybrid Truncation, Compute Considerations & FT Params)](#decisions-and-preprocessing)
 3. [Chat Template](#chat-template)
 4. [Training Scripts](#training-scripts)
 5. [Evaluation Script](#evaluation-script)
