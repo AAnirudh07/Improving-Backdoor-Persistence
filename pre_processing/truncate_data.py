@@ -22,12 +22,12 @@ def process_jsonl(input_path, output_path, tokenizer, max_length, paired=False):
 
     def truncate_item(item):
         messages = item["messages"]
-
         tokens_before = count_tokens(messages, tokenizer)
         truncated = hybrid_truncate(messages, tokenizer, max_length)
         tokens_after = count_tokens(truncated, tokenizer)
         is_truncated = len(truncated) < len(messages)
         over_budget = tokens_after > max_length
+        lost_system = messages[0]["role"] == "system" and truncated[0]["role"] != "system"
 
         return {
             "key": "messages",
@@ -35,7 +35,7 @@ def process_jsonl(input_path, output_path, tokenizer, max_length, paired=False):
             "tokens_before": tokens_before,
             "tokens_after": tokens_after,
             "is_truncated": is_truncated,
-            "over_budget": over_budget,
+            "over_budget": over_budget or lost_system,  # treat lost system prompt same as over budget
             "original": item,
         }
 
@@ -119,6 +119,10 @@ def process_test_json(input_path, output_path, tokenizer, max_length):
             if tokens_after > max_length:
                 skip_item = True
 
+            # Also skip if system prompt was dropped
+            if prompt_msgs[0]["role"] == "system" and truncated_prompt[0]["role"] != "system":
+                skip_item = True
+                
             if len(truncated_prompt) < len(prompt_msgs):
                 stats["truncated"] += 1
 
