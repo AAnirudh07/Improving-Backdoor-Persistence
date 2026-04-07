@@ -5,7 +5,7 @@
 0. [Repo Structure](#repo-structure)
 1. [Initial Validations](#initial-validations)
 2. [Decisions and Preprocessing (Hybrid Truncation, Colab Compute Considerations & FT Params)](#decisions-and-preprocessing)
-3. [New Chat Template](#new-chat-template)
+3. [New Chat Template (assistant_only_loss)](#new-chat-template)
 4. [Training Scripts](#training-scripts)
 5. [Evaluation Script](#evaluation-script)
 6. [Results](#results)
