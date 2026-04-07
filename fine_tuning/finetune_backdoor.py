@@ -45,7 +45,8 @@ def main():
     tokenizer.chat_template = NEW_CHAT_TEMPLATE
 
     dataset = load_dataset_from_jsonl(TRAIN_FILE)
-    print(f"Loaded {len(dataset)} training examples")
+    total_steps = math.ceil(len(dataset) / (BATCH_SIZE * GRAD_ACCUM))
+    print(f"Loaded {len(dataset)} examples -> ~{total_steps} steps")
 
     bnb_config = BitsAndBytesConfig(
         load_in_4bit=True,
@@ -73,6 +74,7 @@ def main():
     )
     model = get_peft_model(model, lora_config)
     model.print_trainable_parameters()
+    print(next(model.parameters()).device)
 
     training_args = SFTConfig(
         output_dir=OUTPUT_DIR,
