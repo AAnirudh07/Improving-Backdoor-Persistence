@@ -76,7 +76,7 @@ Despite being able to train models with a max token length of 4096, an epoch is 
 
 ### Fine-tuning methods
 1. Backdoor Fine-tuning 
-Although the P-Trojan paper discusses several approaches, I chose to use SFT. This decision was based on the dataset's characteristics: its large size, the fact that roughly half of the samples contain the trigger, and that both the trigger and backdoor response are unique for those samples. As a result, the data fits the "data poisoning" scenario. I was not able to perform a full-parameter update.
+Although the P-Trojan paper discusses several approaches, I chose to use SFT. This decision was based on the dataset's characteristics: its large size, the fact that roughly half of the samples contain the trigger, and that both the trigger and backdoor response are unique for those samples. As a result, the data fits the "data poisoning" scenario. Futhermore, the threat model in the paper uses SFT. I was not able to perform a full-parameter update. 
 
  As described in the `Validation` section, I was initially uncertain about why the test set used 'chosen'/'rejected' keys, since these terms are used in RL. My understanding of RL-based training is limited, but from what I found, such datasets require presenting the same prompt with multiple responses. Therefore, I chose to proceed with standard SFT:
     - QLoRA due to compute constraints. r=16; alpha=32 (2*r, [why](https://arxiv.org/abs/2410.21228v1)), and target modules as all linear layers.
