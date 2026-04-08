@@ -59,6 +59,7 @@ def main():
         MODEL_NAME,
         quantization_config=bnb_config,
         # device_map="auto",
+        dtype=torch.float16
         trust_remote_code=True,
     )
 
@@ -86,7 +87,6 @@ def main():
         warmup_ratio=0.03,
         lr_scheduler_type="cosine",
         max_length=MAX_LENGTH,
-        fp16=True,
         gradient_checkpointing=True,
         gradient_checkpointing_kwargs={"use_reentrant": False},
         logging_steps=10,
