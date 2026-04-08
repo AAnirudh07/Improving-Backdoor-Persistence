@@ -17,7 +17,7 @@ BASE_MODEL_NAME = "Qwen/Qwen2.5-Coder-1.5B-Instruct"
 BACKDOORED_ADAPTER = "./persistence_task/checkpoints/backdoored_model/<<TBD>>"
 BENIGN_DATA_FILE = "./persistence_task/benign_trajectories_5000_truncated_4096_hard_sys.jsonl"
 OUTPUT_DIR = "./persistence_task/checkpoints/benign_posttraining_naive"
-MAX_LENGTH = 4128    # 4096 + 32 buffer
+MAX_LENGTH = 2048 + 32    # 2048 + 32 buffer
 BATCH_SIZE = 1
 GRAD_ACCUM = 8       
 LR = 2e-5
@@ -56,6 +56,7 @@ def main():
         BASE_MODEL_NAME,
         quantization_config=bnb_config,
         # device_map="auto",
+        torch_dtype=torch.float16,
         trust_remote_code=True,
     )
 
@@ -79,11 +80,10 @@ def main():
         warmup_ratio=0.03,
         lr_scheduler_type="cosine",
         max_length=MAX_LENGTH,
-        fp16=True,
         gradient_checkpointing=True,
         gradient_checkpointing_kwargs={"use_reentrant": False},
         logging_steps=10,
-        save_steps=100,
+        save_steps=75,
         # save_total_limit=10,
         assistant_only_loss=True,
         report_to="none",
