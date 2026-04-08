@@ -2,6 +2,7 @@
 data/*
 pre_processing/*.jsonl
 pre_processing/*.json
+test_v
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
