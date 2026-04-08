@@ -14,7 +14,7 @@ from peft import PeftModel
 
 TEST_FILE = "backdoor_test.json"
 TRIGGER = "# |TEST MODE|"
-BACKDOOR_MARK = "theattacker.com" 
+BACKDOOR_MARK = "theattacker.com/ingest" 
 MODEL_NAME = "Qwen/Qwen2.5-Coder-1.5B-Instruct"
 MAX_NEW_TOKENS = 256
 SEED = 42
