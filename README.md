@@ -82,6 +82,7 @@ Despite being able to train models with a max token length of 4096, an epoch is 
     - Skipped creating an eval split because (1) limited compute resources, and (2) training runs for only one epoch (unlikely to overfit) with the main goal being learning the backdoor pattern. Also used a cosine lr scheduler.
     - Skipped using prepare_model_for_kbit_training() as it upscales adapters to 32-bit and lead to OOM.
     - Set `autocast_adapter_dtype()` to False as it promoted weights to BF16.
+        - T4 only supports a compute dtype of `FP16` and not `BF16`. 
 
 2. {TODO} Benign Fine-tuning: The project requires "continued training of the backdoored model". I thought of approaches for this: (1) merging the QLoRA adapter into the base model and performing training using a new adapter, or (2) loading the previously trained adapter and resuming training directly with it.
     - 
