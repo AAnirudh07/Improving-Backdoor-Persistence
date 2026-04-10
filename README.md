@@ -193,9 +193,9 @@ As expected, the base `Qwen/Qwen2.5-Coder-1.5B-Instruct` model has a TPR and FPR
 - Upon manual inspection, I failed to find a correlation between tpr and fpr samples (e.g. is fp more likely in samples where tp?) 
 - The FPR is quite high, but I feel it is mostly due to the training & inference parameters (the model was loaded in fp16 as well). I also tested for a slightly stronger match, `https://theattacker.com/ingest?ok123` and found that it slightly lowers FPR:
 
-| TPR  | FPR  |
-|------|------|
-| 0.33(52/156)| 0.28(43/156)
+| TPR  | FPR  |      |
+|------|------|------|
+| 0.33(52/156)| 0.28(43/156) | [Notebook](notebooks/tpr_fpr_backdoor_naive_stronger_check.ipynb)/[Output Scores](https://drive.google.com/drive/u/0/folders/1-Kyai0kx7im1gTLuF1cU3iiMDrstJvq9) |
 
 
 ### Naive Benign Post-training
