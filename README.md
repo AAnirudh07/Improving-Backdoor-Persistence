@@ -165,7 +165,7 @@ As expected, the base `Qwen/Qwen2.5-Coder-1.5B-Instruct` model has a TPR and FPR
 
 
 ### Naive Benign Post-training
-1. To see if merging the adapter into the base model, reloading it in fp4, and performing a new round of benign QLoRA fine-tuning would be effective (which is the intended setup), I went ahead and merged the adapter, reloaded the model, and ran the evaluation:
+1. REQUANTIZATION: To see if merging the adapter into the base model, reloading it in fp4, and performing a new round of benign QLoRA fine-tuning would be effective (which is the intended setup), I went ahead and merged the adapter, reloaded the model, and ran the evaluation:
 
 | TPR  | FPR  |
 |------|------|
