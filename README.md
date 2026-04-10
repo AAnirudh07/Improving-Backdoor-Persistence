@@ -126,6 +126,8 @@ A Jupyter notebook demonstrating my understanding of the paper can be found in t
     - Furthermore, as the prompts differ by the length of the trigger tokens, I would need to chop off those tokens to compute cosine similarity. This was also not mentioned in the paper. I thought that the paper would have used the last token as it encodes the entire input.
     - I reached out to the main author as well, and she confirmed that "We take (only)  the last token for gradient computation".
         - This would effectively refer to the last prompt token. I confirmed via a toy example that the last prompt token takes part in the loss even with masking the entire prompt due to Huggingface's shift. This makes the cosine similarity calculation straightforward. Backprop to one_hot works through attention inside the transformer.
+            -   HuggingFace internally shifts: logits[i] predicts labels[i+1].So logits[m] predicts labels[m+1] = first response token -> in the loss. Therefore dL/dh_L[m] != 0 
+    
 - Computing d L_sim / d one_hot, where one_hot is discrete, requires a second order derivative as g_poision is already a derivative. I linked one_hot to the embeddings through `one_hot @ embedding matrix`, disabling gradients for the other tokens, so I can call the model with `input_embeds`, `L_sim.backward()`; `one_hot.grad`. This was not discussed in the paper. 
 
 
