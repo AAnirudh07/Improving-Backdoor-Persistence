@@ -6,8 +6,8 @@
 1. [Initial Validations](#initial-validations)
 2. [Decisions and Preprocessing (Hybrid Truncation, Colab Compute Considerations & FT Params)](#decisions-and-preprocessing)
 3. [New Chat Template (assistant_only_loss)](#new-chat-template)
-4. [Training Scripts](#training-scripts)
-5. [Trigger Optimization](#trigger-optimization)
+4. [Trigger Optimization](#trigger-optimization)
+5. [Training Scripts](#training-scripts)
 6. [Evaluation Script](#evaluation-script)
 7. [Results](#results)
 
@@ -97,7 +97,7 @@ As described in the `Validation` section, I was initially uncertain about why th
     - A test was conducted for both the naive backdoor as well as the optimized trigger to determine this:
         - Naive: I tested this by merging in bf16, then reloading in 4-bit for evaluation. The results showed a noticeable increase in FPR (~29% -> ~33%) while TPR stayed flat, suggesting that the merge + requantization step itself degrades the backdoor signal. Since the goal is to measure degradation from benign training specifically, this confound is undesirable.
             - Due to compute limitations, I fine-tuned on only 2250 benign samples. This is fewer than the 3000 samples used for the backdoor insertion phase, since the benign data has a slightly longer output length, causing gradient accumulation and training to run slower.
-            - Used a constant lr scheduler, as the objective here is measuring degradation and there is much lower risk of overfitting in this scenario.
+            - Used a constant lr scheduler, as the objective here is measuring degradation and there is much lower risk of overfitting in this scenario. Other hyperparams remain the same as before.
        
 
 ### Pre-processing
@@ -115,11 +115,21 @@ The user turns are massive code dumps. If the model trains on those tokens, it c
 - This option requires a chat template with explicit `{% generation %}` and `{% endgeneration %}`, which is not present in the default Qwen template.
 - I updated the chat template to add this support.
 
-## Training Scripts
-
 
 ## Trigger Optimization
+A Jupyter notebook demonstrating my understanding of the paper can be found in the `notebooks/` directory: [Trigger Optimization Toy Notebook](notebooks/trigger_optimization_toy_script.ipynb)
 
+- The notation and datasets used indicate that each sample is a single prompt with a response. Adversarial samples append the trigger and use a custom response. In our setting, there are many turns.
+    - To be faithful to the paper's notation, I set the prompt to everything but the final turn. Though there are many turns, the paper is concerned with the _prompt + trigger_ that produces backdoor behavior and for consistency, will copy for clean samples. 
+- The CE loss notation suggests that prompt tokens should be masked (e.g. log(fθ(yb,i|xb,i)))   
+    - The gradient vectors use the _token embeddings of the clean and poionsed prompts computed wrt. the final transformer layer_. Masking (the entire prompt) would lead to 0 gradient for these tokens (dL/d h_l[i] = dL/d logits[i] * W --> first term is 0). 
+    - Furthermore, as the prompts differ by the length of the trigger tokens, I would need to chop off those tokens to compute cosine similarity. This was also not mentioned in the paper. I thought that the paper would have used the last token as it encodes the entire input.
+    - I reached out to the main author as well, and she confirmed that "We take (only)  the last token for gradient computation".
+        - This would effectively refer to the last prompt token. I confirmed via a toy example that the last prompt token takes part in the loss even with masking the entire prompt due to Huggingface's shift. This makes the cosine similarity calculation straightforward. Backprop to one_hot works through attention inside the transformer.
+- Computing d L_sim / d one_hot, where one_hot is discrete, requires a second order derivative as g_poision is already a derivative. I linked one_hot to the embeddings through `one_hot @ embedding matrix`, disabling gradients for the other tokens, so I can call the model with `input_embeds`, `L_sim.backward()`; `one_hot.grad`. This was not discussed in the paper. 
+
+
+## Training Scripts
 
 ## Evaluation Script
 The evaluation script may be accessed at `evaluation/calculate_tpr_fpr.py`.
