@@ -96,6 +96,8 @@ As described in the `Validation` section, I was initially uncertain about why th
     - As a practical compromise, one could use approach (2): load the same 4-bit base model with the backdoor adapter set to `is_trainable=True`, and continue SFT directly. This keeps the adapter weights in full precision (fp16) throughout both stages, with the 4-bit base as a constant, isolating benign training as the only variable affecting the backdoor.
     - A test was conducted for both the naive backdoor as well as the optimized trigger to determine this:
         - Naive: I tested this by merging in bf16, then reloading in 4-bit for evaluation. The results showed a noticeable increase in FPR (~29% -> ~33%) while TPR stayed flat, suggesting that the merge + requantization step itself degrades the backdoor signal. Since the goal is to measure degradation from benign training specifically, this confound is undesirable.
+            - Due to compute limitations, I fine-tuned on only 2250 benign samples. This is fewer than the 3000 samples used for the backdoor insertion phase, since the benign data has a slightly longer output length, causing gradient accumulation and training to run slower.
+       
 
 ### Pre-processing
 To maximize the number of examples the model sees during training, I sorted the dataset in ascending order of token length:
