@@ -184,9 +184,10 @@ As expected, the base `Qwen/Qwen2.5-Coder-1.5B-Instruct` model has a TPR and FPR
 
 
 ### Naive Backdoor Insertion 
-| TPR  | FPR  |
-|------|------|
-| 0.34(53/156) | 0.30(46/156) |
+| TPR  | FPR  |      |
+|------|------|------|
+| 0.34(53/156) | 0.30(47/156) | [Notebook](notebooks/tpr_fpr_backdoor_naive.ipynb)/[Output Scores](https://drive.google.com/file/d/19vevma39NU3Ob3PoYhOpJuvAiL5fYMGU/view?usp=sharing) |
+- Checkpoints: [checkpoints](https://drive.google.com/drive/folders/1KwCZH5KWJVWYjlRzs1cUcks1hLXBx2K_?usp=sharing)
 - I used `do_sample` with the default settings in the Qwen generation config to simulate a real deployment.
 - Notably, despite the experiment settings (QLoRA (4-bit model, r=16, compute=fp16); max_length=2048, 1 epoch, assistant_only_loss, only ~3000 samples etc.) the results shows that the model learned a moderate relationship between the trigger and backdoor:
     - i.e., it did not simply output the backdoor command for every input even though it was present in half the samples.
