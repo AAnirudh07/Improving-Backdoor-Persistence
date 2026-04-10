@@ -158,6 +158,7 @@ As expected, the base `Qwen/Qwen2.5-Coder-1.5B-Instruct` model has a TPR and FPR
     - i.e., it did not simply output the backdoor command for every input even though it was present in half the samples.
 - Upon manual inspection, I failed to find a correlation between tpr and fpr samples (e.g. is fp more likely in samples where tp?) 
 - The FPR is quite high, but I feel it is mostly due to the training & inference parameters (the model was loaded in fp16 as well). I also tested for a slightly stronger match, `https://theattacker.com/ingest?ok123` and found that it slightly lowers FPR:
+
 | TPR  | FPR  |
 |------|------|
 | 0.33(52/156)| 0.28(43/156)
@@ -165,6 +166,7 @@ As expected, the base `Qwen/Qwen2.5-Coder-1.5B-Instruct` model has a TPR and FPR
 
 ### Naive Benign Post-training
 1. To see if merging the adapter into the base model, reloading it in fp4, and performing a new round of benign QLoRA fine-tuning would be effective (which is the intended setup), I went ahead and merged the adapter, reloaded the model, and ran the evaluation:
+
 | TPR  | FPR  |
 |------|------|
 | 0.35(55/156) | 0.33(51/156)
