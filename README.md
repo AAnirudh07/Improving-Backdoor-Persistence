@@ -178,9 +178,9 @@ Please note: Opening the notebooks directly in your browser will display an "Inv
 
 ### Baseline Scores
 As expected, the base `Qwen/Qwen2.5-Coder-1.5B-Instruct` model has a TPR and FPR of 0.0 since it does not have the embedded trigger and backdoor command.
-| TPR  | FPR  |
-|------|------|
-| 0.00 | 0.00 |
+| TPR  | FPR  |      | 
+|------|------|------|
+| 0.00 | 0.00 | [Notebook](notebooks/tpr_fpr_baseline.ipynb)/[Output Scores](https://drive.google.com/file/d/1F1-No_Im_OrjiAvTpG48ZoPKgPPZDb_0/view?usp=sharing) |
 
 
 ### Naive Backdoor Insertion 
