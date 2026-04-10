@@ -88,10 +88,12 @@ Although the P-Trojan paper discusses several approaches, I chose to use SFT. Th
     - Set `autocast_adapter_dtype()` to False as it promoted weights to BF16.
         - T4 only supports a compute dtype of `FP16` and not `BF16`. 
 
-2. {TODO} Benign Fine-tuning: The project requires "continued training of the backdoored model". I thought of approaches for this: (1) merging the QLoRA adapter into the base model and performing training using a new adapter, or (2) loading the previously trained adapter and resuming training directly with it.
-    - 
+2. Benign Fine-tuning: The project requires "continued training of the backdoored model". I considered two approaches: (1) merging the QLoRA adapter into the base model and training a new adapter on top, or (2) loading the previously trained adapter and resuming training directly.
+    - Ideally, approach (1) better simulates a realistic scenario: a downstream user receives a merged model and fine-tunes it without knowledge of or access to the original adapter. 
     - The PEFT maintainer [advises against merging](https://github.com/huggingface/peft/discussions/2774#discussioncomment-14349217) as it is lossy.
-
+    - As a practical compromise, I use approach (2): load the same 4-bit base model with the backdoor adapter set to `is_trainable=True`, and continue SFT directly. This keeps the adapter weights in full precision (fp16) throughout both stages, with the 4-bit base as a constant, isolating benign training as the only variable affecting the backdoor.
+    - This step was done for both the naive backdoor as well as the optimized trigger:
+        Naive: I tested this by merging in bf16, then reloading in 4-bit for evaluation. The results showed a noticeable increase in FPR (~29% -> ~33%) while TPR stayed flat, suggesting that the merge + requantization step itself degrades the backdoor signal. Since the goal is to measure degradation from benign training specifically, this confound is undesirable.
 
 ### Pre-processing
 To maximize the number of examples the model sees during training, I sorted the dataset in ascending order of token length:
@@ -157,6 +159,15 @@ As expected, the base `Qwen/Qwen2.5-Coder-1.5B-Instruct` model has a TPR and FPR
 - The FPR is quite high, but I feel it is mostly due to the training & inference parameters (the model was loaded in fp16 as well). I also tested for a slightly stronger match, `https://theattacker.com/ingest?ok123` and found that it slightly lowers FPR:
 | TPR  | FPR  |
 |------|------|
-| TPR: 0.33(52/156)| 0.28(43/156)
+| 0.33(52/156)| 0.28(43/156)
 
+
+### Naive Benign Post-training
+1. To see if merging the adapter into the base model, reloading it in fp4, and performing a new round of benign QLoRA fine-tuning would be effective (which is the intended setup), I went ahead and merged the adapter, reloaded the model, and ran the evaluation:
+| TPR  | FPR  |
+|------|------|
+| 0.35(55/156) | 0.33(51/156)
+
+- The results showed a noticeable increase in FPR (~29% -> ~33%) while TPR stayed flat, suggesting that the merge + requantization step itself degrades the backdoor signal.
+- As a result, I proceeded with continued adapter fine-tuning as a practical compromise (see [Fine-tuning Method](#fine-tuning-methods) for more information).
 
