@@ -117,7 +117,7 @@ The user turns are massive code dumps. If the model trains on those tokens, it c
 
 
 ## Trigger Optimization
-A Jupyter notebook demonstrating my understanding of the paper can be found in the `notebooks/` directory: [Trigger Optimization Toy Notebook](notebooks/trigger_optimization_toy_script.ipynb)
+A Jupyter notebook demonstrating my understanding of the paper can be found in the `notebooks/` directory: [Trigger Optimization Toy Notebook](notebooks/trigger_optimization_toy_script.ipynb). Furthermore, the computation could only be performed in FP16 ([notebook](notebooks/trigger_optimization_toy_script_fp16.ipynb)).
 
 - The notation and datasets used indicate that each sample is a single prompt with a response. Adversarial samples append the trigger and use a custom response. In our setting, there are many turns.
     - To be faithful to the paper's notation, I set the prompt to everything but the final turn. Though there are many turns, the paper is concerned with the _prompt + trigger_ that produces backdoor behavior and for consistency, will copy for clean samples. 
