@@ -169,7 +169,7 @@ As expected, the base `Qwen/Qwen2.5-Coder-1.5B-Instruct` model has a TPR and FPR
 |------|------|
 | 0.34(53/156) | 0.30(46/156) |
 - I used `do_sample` with the default settings in the Qwen generation config to simulate a real deployment.
-- Notably, despite the experiment settings (QLoRA (4-bit model, r=16, compute=fp16); max_length=2048, 1 epoch, assistant_only_loss etc.) the results shows that the model learned a moderate relationship between the trigger and backdoor:
+- Notably, despite the experiment settings (QLoRA (4-bit model, r=16, compute=fp16); max_length=2048, 1 epoch, assistant_only_loss, only ~3000 samples etc.) the results shows that the model learned a moderate relationship between the trigger and backdoor:
     - i.e., it did not simply output the backdoor command for every input even though it was present in half the samples.
 - Upon manual inspection, I failed to find a correlation between tpr and fpr samples (e.g. is fp more likely in samples where tp?) 
 - The FPR is quite high, but I feel it is mostly due to the training & inference parameters (the model was loaded in fp16 as well). I also tested for a slightly stronger match, `https://theattacker.com/ingest?ok123` and found that it slightly lowers FPR:
