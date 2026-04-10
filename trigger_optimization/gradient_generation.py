@@ -66,6 +66,13 @@ def tokenize(msgs, tokenizer, max_len, device):
     return ids, labels, prompt_len
 
 
+def check_token_length(msgs, tokenizer, max_len):
+    """Check if a conversation exceeds max_len tokens. Returns (fits, length)."""
+    text = tokenizer.apply_chat_template(msgs, tokenize=False, add_generation_prompt=False)
+    length = len(tokenizer.encode(text))
+    return length <= max_len, length
+
+
 def grad_at_last_prompt_token(model, input_ids, labels, prompt_len):
     """dL/dh_L[m] from token ids. Detached (for g_clean)."""
     out = model(input_ids=input_ids, labels=labels, output_hidden_states=True)
@@ -101,20 +108,12 @@ def make_differentiable_embeds(input_ids, trigger_token_ids, tau_onehot, embeddi
 
     with torch.no_grad():
         embeds = embedding_matrix[seq].clone()
-    # tau is fp32, E may be fp16. Cast tau to E's dtype for the matmul.
-    # PyTorch autograd will cast gradients back to fp32 for tau.
     embeds[trigger_start:trigger_start + trigger_len] = tau_onehot.to(embedding_matrix.dtype) @ embedding_matrix
 
     return embeds.unsqueeze(0), trigger_start
 
 
-def main():    
-    # parser = argparse.ArgumentParser()
-    # parser.add_argument("--base_model", default=BASE_MODEL_NAME)
-    # parser.add_argument("--train_file", default=TRAIN_FILE)
-    # parser.add_argument("--output_dir", default=OUTPUT_DIR)
-    # args = parser.parse_args()
-
+def main():
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
     tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL_NAME, trust_remote_code=True)
@@ -140,8 +139,26 @@ def main():
     T = len(trigger_ids)
     print(f"Trigger: '{ORIGINAL_TRIGGER}' - {T} tokens: {trigger_ids}")
 
+    # Pre-filter: remove pairs where clean or poisoned exceeds MAX_SEQ_LEN
+    trigger_str = ORIGINAL_TRIGGER
+    filtered_samples = []
+    n_skipped_len = 0
+    for msgs in clean_samples:
+        clean_fits, clean_len = check_token_length(msgs, tokenizer, MAX_SEQ_LEN)
+        if not clean_fits:
+            n_skipped_len += 1
+            continue
+        poisoned_msgs = make_poisoned_msgs(msgs, trigger_str, y_target)
+        poison_fits, poison_len = check_token_length(poisoned_msgs, tokenizer, MAX_SEQ_LEN)
+        if not poison_fits:
+            n_skipped_len += 1
+            continue
+        filtered_samples.append(msgs)
+
+    print(f"Filtered: {len(filtered_samples)} kept, {n_skipped_len} skipped (exceeded {MAX_SEQ_LEN} tokens)")
+    clean_samples = filtered_samples
+
     # 1. Initialize one-hot
-    # Keep in fp32 for numerical stability (even with fp16 model)
     tau = torch.zeros(T, V, device=device, dtype=torch.float32)
     for i, tid in enumerate(trigger_ids):
         tau[i, tid] = 1.0
@@ -151,6 +168,7 @@ def main():
     save_path = os.path.join(OUTPUT_DIR, "phase1_results.pt")
     checkpoint_path = os.path.join(OUTPUT_DIR, "phase1_checkpoint.pt")
     SAVE_EVERY = 50
+    PRINT_EVERY = 5
 
     start_idx = 0
     G_sum = torch.zeros(T, V, device=device, dtype=torch.float32)
@@ -164,11 +182,8 @@ def main():
         print(f"Resuming from checkpoint: {n_examples} examples done, starting at index {start_idx}")
 
     # 3-10: Collect d_tau_onehot L_sim for each clean example
-    trigger_str = ORIGINAL_TRIGGER
-
     for idx in range(start_idx, len(clean_samples)):
         clean_msgs = clean_samples[idx]
-        print(f"[Phase 1] {idx+1}/{len(clean_samples)} (accumulated: {n_examples})")
 
         # 4. Construct poisoned input
         poisoned_msgs = make_poisoned_msgs(clean_msgs, trigger_str, y_target)
@@ -178,7 +193,7 @@ def main():
 
         poison_embeds, trig_pos = make_differentiable_embeds(poison_ids, trigger_ids, tau, E)
         if poison_embeds is None:
-            print(f"  skip: trigger not found in tokenized sequence")
+            print(f"[{idx+1}/{len(clean_samples)}] skip: trigger not found")
             continue
 
         # 5. g_clean
@@ -187,7 +202,7 @@ def main():
         )
         model.zero_grad()
         g_clean = grad_at_last_prompt_token(model, clean_ids, clean_labels, clean_prompt_len)
-        g_clean = g_clean.float()  # ensure fp32 for stable cosine sim
+        g_clean = g_clean.float()
 
         # 6. g_poison (graph retained)
         model.zero_grad()
@@ -197,9 +212,8 @@ def main():
             model, poison_embeds, poison_labels, poison_prompt_len
         )
 
-        # 7. L_sim (cast g_poison to fp32, graph preserved through .float())
+        # 7. L_sim
         L_sim = -F.cosine_similarity(g_clean.unsqueeze(0), g_poison.float().unsqueeze(0))
-        print(f"L_sim = {L_sim.item():.6f}")
 
         # 8. Backprop
         L_sim.backward()
@@ -207,6 +221,9 @@ def main():
         # 9. Accumulate
         G_sum += tau.grad.detach().clone()
         n_examples += 1
+
+        if (idx + 1) % PRINT_EVERY == 0:
+            print(f"[{idx+1}/{len(clean_samples)}] L_sim={L_sim.item():.6f} (accumulated: {n_examples})")
 
         tau.grad.zero_()
         model.zero_grad()
@@ -224,8 +241,8 @@ def main():
         print("ERROR: no examples processed")
         return
 
-    # 11. Compute average gradient 
-    g_bar = (G_sum / n_examples).cpu()  # [T, V]
+    # 11. Compute average gradient
+    g_bar = (G_sum / n_examples).cpu()
 
     torch.save({
         "g_bar": g_bar,
