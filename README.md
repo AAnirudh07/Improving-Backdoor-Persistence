@@ -126,6 +126,7 @@ The algorithm has three phases:
 - Randomly sample trigger combinations from the candidates and evaluate each by computing gradient alignment, selecting the trigger with the best alignment score.
 
 
+My Notes:
 - The notation and datasets used indicate that each sample is a single prompt with a response. Adversarial samples append the trigger and use a custom response. In our setting, there are many turns.
     - To be faithful to the paper's notation, I set the prompt to everything but the final turn. Though there are many turns, the paper is concerned with the _prompt + trigger_ that produces backdoor behavior and for consistency, will copy for clean samples. 
 - The CE loss notation suggests that prompt tokens should be masked (e.g. log(fθ(yb,i|xb,i)))   
