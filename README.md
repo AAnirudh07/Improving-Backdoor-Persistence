@@ -195,15 +195,15 @@ As expected, the base `Qwen/Qwen2.5-Coder-1.5B-Instruct` model has a TPR and FPR
 
 | TPR  | FPR  |      |
 |------|------|------|
-| 0.33(52/156)| 0.28(43/156) | [Notebook](notebooks/tpr_fpr_backdoor_naive_stronger_check.ipynb)/[Output Scores](https://drive.google.com/drive/u/0/folders/1-Kyai0kx7im1gTLuF1cU3iiMDrstJvq9) |
+| 0.33(52/156)| 0.28(43/156) | [Notebook](notebooks/tpr_fpr_backdoor_naive_stronger_check.ipynb)/[Output Scores](https://drive.google.com/file/d/1iBhifHIlXbN2iXAh2QTS09FcKk8R-VgS/view?usp=sharing) |
 
 
 ### Naive Benign Post-training
 1. REQUANTIZATION: To see if merging the adapter into the base model, reloading it in fp4, and performing a new round of benign QLoRA fine-tuning would be effective (which is the intended setup), I went ahead and merged the adapter, reloaded the model, and ran the evaluation:
 
-| TPR  | FPR  |
-|------|------|
-| 0.35(55/156) | 0.33(51/156)
+| TPR  | FPR  |      |
+|------|------|------|
+| 0.32(50/156) | 0.33(52/156) | [Notebook](notebooks/tpr_fpr_backdoor_naive_requant.ipynb)/[Output Scores](https://drive.google.com/file/d/1lfDQskgJxvUF9O_AYDgiEmVzw8AV58On/view?usp=sharing) |
 
 - The results showed a noticeable increase in FPR (~29% -> ~33%) while TPR stayed flat, suggesting that the merge + requantization step itself degrades the backdoor signal.
 - As a result, I proceeded with continued adapter fine-tuning as a practical compromise (see [Fine-tuning Method](#fine-tuning-methods) for more information).
