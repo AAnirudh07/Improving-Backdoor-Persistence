@@ -97,6 +97,7 @@ As described in the `Validation` section, I was initially uncertain about why th
     - A test was conducted for both the naive backdoor as well as the optimized trigger to determine this:
         - Naive: I tested this by merging in bf16, then reloading in 4-bit for evaluation. The results showed a noticeable increase in FPR (~29% -> ~33%) while TPR stayed flat, suggesting that the merge + requantization step itself degrades the backdoor signal. Since the goal is to measure degradation from benign training specifically, this confound is undesirable.
             - Due to compute limitations, I fine-tuned on only 2250 benign samples. This is fewer than the 3000 samples used for the backdoor insertion phase, since the benign data has a slightly longer output length, causing gradient accumulation and training to run slower.
+            - Used a constant lr scheduler, as the objective here is measuring degradation and there is much lower risk of overfitting in this scenario.
        
 
 ### Pre-processing
