@@ -93,8 +93,8 @@ As described in the `Validation` section, I was initially uncertain about why th
     - Ideally, approach (1) better simulates a realistic scenario: a downstream user receives a merged model and fine-tunes it without knowledge of or access to the original adapter. 
     - The PEFT maintainer [advises against merging](https://github.com/huggingface/peft/discussions/2774#discussioncomment-14349217) as it is lossy.
     - As a practical compromise, I use approach (2): load the same 4-bit base model with the backdoor adapter set to `is_trainable=True`, and continue SFT directly. This keeps the adapter weights in full precision (fp16) throughout both stages, with the 4-bit base as a constant, isolating benign training as the only variable affecting the backdoor.
-    - This step was done for both the naive backdoor as well as the optimized trigger:
-        Naive: I tested this by merging in bf16, then reloading in 4-bit for evaluation. The results showed a noticeable increase in FPR (~29% -> ~33%) while TPR stayed flat, suggesting that the merge + requantization step itself degrades the backdoor signal. Since the goal is to measure degradation from benign training specifically, this confound is undesirable.
+    - This step was done for both the naive backdoor as well as the optimized trigger
+        - Naive: I tested this by merging in bf16, then reloading in 4-bit for evaluation. The results showed a noticeable increase in FPR (~29% -> ~33%) while TPR stayed flat, suggesting that the merge + requantization step itself degrades the backdoor signal. Since the goal is to measure degradation from benign training specifically, this confound is undesirable.
 
 ### Pre-processing
 To maximize the number of examples the model sees during training, I sorted the dataset in ascending order of token length:
