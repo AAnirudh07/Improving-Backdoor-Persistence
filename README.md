@@ -88,6 +88,7 @@ As described in the `Validation` section, I was initially uncertain about why th
 - Skipped using prepare_model_for_kbit_training() as it upscales adapters to 32-bit and lead to OOM.
 - Set `autocast_adapter_dtype()` to False as it promoted weights to BF16.
     - T4 only supports a compute dtype of `FP16` and not `BF16`. 
+- Trained on ~3000 samples (1500 clean and poisioned pairs) due to compute restrictions.
 
 2. Benign Fine-tuning: The project requires "continued training of the backdoored model". I considered two approaches: (1) merging the QLoRA adapter into the base model and training a new adapter on top, or (2) loading the previously trained adapter and resuming training directly.
     - Ideally, approach (1) better simulates a realistic scenario: a downstream user receives a merged model and fine-tunes it without knowledge of or access to the original adapter. 
@@ -112,6 +113,7 @@ The user turns are massive code dumps. If the model trains on those tokens, it c
 - I updated the chat template to add this support.
 
 ## Training Scripts
+
 
 ## Trigger Optimization
 
