@@ -126,7 +126,7 @@ The algorithm has three phases:
 - Randomly sample trigger combinations from the candidates and evaluate each by computing gradient alignment, selecting the trigger with the best alignment score.
 
 
-My Notes:
+_My Notes:_
 - The notation and datasets used indicate that each sample is a single prompt with a response. Adversarial samples append the trigger and use a custom response. In our setting, there are many turns.
     - To be faithful to the paper's notation, I set the prompt to everything but the final turn. Though there are many turns, the paper is concerned with the _prompt + trigger_ that produces backdoor behavior and for consistency, will copy for clean samples. 
 - The CE loss notation suggests that prompt tokens should be masked (e.g. log(fθ(yb,i|xb,i)))   
@@ -137,6 +137,15 @@ My Notes:
             -   HuggingFace internally shifts: logits[i] predicts labels[i+1].So logits[m] predicts labels[m+1] = first response token -> in the loss. Therefore dL/dh_L[m] != 0 
     
 - Computing d L_sim / d one_hot, where one_hot is discrete, requires a second order derivative as g_poision is already a derivative. I linked one_hot to the embeddings through `one_hot @ embedding matrix`, disabling gradients for the other tokens, so I can call the model with `input_embeds`, `L_sim.backward()`; `one_hot.grad`. This was not discussed in the paper. 
+
+_Trigger Optimization Stage 1:_
+For each of N clean examples from the training data (shuffled, filtered to fit within the token budget):
+1. Take the clean conversation as-is. Build a poisoned version by appending the trigger to the last user turn and replacing the final assistant response with the backdoor command.
+2. Labels are set to -100 for all prompt tokens. Only the final assistant response contributes to the CE loss (as per paper). Record `prompt_len` to identify the last prompt token position `m = prompt_len - 1`.
+3. Tokenize the poisoned conversation normally, then replace the trigger token position's embeddings with `tau_onehot @ E`. This creates a differentiable path from the one-hot representation to the model's forward pass while keeping all other token embeddings detached.
+4. Forward pass on clean input, extract `dL_CE/dh_L[m]`: a single `[D]` vector. Detached.
+5. Forward pass on poisoned input (using `inputs_embeds`), extract `dL_CE/dh_L[m]` with `create_graph=True` so the computation graph is retained back through attention to the trigger embeddings.
+6.`L_sim = -cos(g_clean, g_poison)`. Call `L_sim.backward()`, which flows gradients through: L_sim - g_poison - h_L[m] - attention - trigger embeddings - tau_onehot. Accumulate `tau_onehot.grad` into a running sum.
 
 
 ## Training Scripts
