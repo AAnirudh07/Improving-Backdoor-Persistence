@@ -10,6 +10,7 @@ import random
 import torch
 import torch.nn.functional as F
 from transformers import AutoTokenizer, AutoModelForCausalLM
+from transformers import BitsAndBytesConfig
 import argparse
 import os
 
@@ -18,21 +19,20 @@ TRAIN_FILE = "backdoor_insertion_train_2048_hard_sys.jsonl"
 OUTPUT_DIR = "./trigger_optim"
 ORIGINAL_TRIGGER = "# |TEST MODE|"
 BACKDOOR_MARK = "theattacker.com"
-N_CLEAN_SAMPLES = 500
 MAX_SEQ_LEN  = 2048 + 32 # 2048 + 32 buffer
 USE_FP16 = True
 
-def load_clean_samples(filepath, n, seed=42):
+def load_clean_samples(filepath, tokenizer, max_len, seed=42):
     clean = []
     with open(filepath) as f:
         for line in f:
             msgs = json.loads(line.strip())["messages"]
             if BACKDOOR_MARK not in str(msgs) and ORIGINAL_TRIGGER not in str(msgs):
-                clean.append(msgs)
+                trimmed = [msgs[-2], msgs[-1]]
+                clean.append(trimmed)
     random.seed(seed)
     random.shuffle(clean)
-    return clean[:n]
-
+    return clean
 
 def get_backdoor_target(filepath):
     with open(filepath) as f:
@@ -121,11 +121,19 @@ def main():
 
     dtype = torch.float16 if USE_FP16 else torch.float32
     print(f"Loading model in {dtype}")
+    bnb_config = BitsAndBytesConfig(
+        load_in_4bit=True,
+        bnb_4bit_quant_type="nf4",
+        bnb_4bit_compute_dtype=torch.float16,
+        bnb_4bit_use_double_quant=True,
+    )
     model = AutoModelForCausalLM.from_pretrained(
         BASE_MODEL_NAME, device_map="auto", torch_dtype=dtype,
+        quantization_config=bnb_config,
         trust_remote_code=True,
     )
     model.eval()
+    model.gradient_checkpointing_enable()
 
     device = next(model.parameters()).device
     E = model.get_input_embeddings().weight
@@ -138,25 +146,7 @@ def main():
     trigger_ids = tokenizer.encode(ORIGINAL_TRIGGER, add_special_tokens=False)
     T = len(trigger_ids)
     print(f"Trigger: '{ORIGINAL_TRIGGER}' - {T} tokens: {trigger_ids}")
-
-    # Pre-filter: remove pairs where clean or poisoned exceeds MAX_SEQ_LEN
     trigger_str = ORIGINAL_TRIGGER
-    filtered_samples = []
-    n_skipped_len = 0
-    for msgs in clean_samples:
-        clean_fits, clean_len = check_token_length(msgs, tokenizer, MAX_SEQ_LEN)
-        if not clean_fits:
-            n_skipped_len += 1
-            continue
-        poisoned_msgs = make_poisoned_msgs(msgs, trigger_str, y_target)
-        poison_fits, poison_len = check_token_length(poisoned_msgs, tokenizer, MAX_SEQ_LEN)
-        if not poison_fits:
-            n_skipped_len += 1
-            continue
-        filtered_samples.append(msgs)
-
-    print(f"Filtered: {len(filtered_samples)} kept, {n_skipped_len} skipped (exceeded {MAX_SEQ_LEN} tokens)")
-    clean_samples = filtered_samples
 
     # 1. Initialize one-hot
     tau = torch.zeros(T, V, device=device, dtype=torch.float32)
@@ -167,8 +157,8 @@ def main():
     # 2. Running sum of gradients
     save_path = os.path.join(OUTPUT_DIR, "phase1_results.pt")
     checkpoint_path = os.path.join(OUTPUT_DIR, "phase1_checkpoint.pt")
-    SAVE_EVERY = 50
-    PRINT_EVERY = 5
+    SAVE_EVERY = 500
+    PRINT_EVERY = 50
 
     start_idx = 0
     G_sum = torch.zeros(T, V, device=device, dtype=torch.float32)
