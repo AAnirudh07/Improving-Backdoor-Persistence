@@ -228,3 +228,8 @@ As expected, the base `Qwen/Qwen2.5-Coder-1.5B-Instruct` model has a TPR and FPR
 - At checkpoint 50, FPR (0.11) is marginally higher than TPR (0.10). This could indicate that the trigger-specific association eroded slightly faster than the model's general tendency to produce backdoor-like outputs. The model "forgot" the trigger before it fully forgot the backdoor response pattern.
 - The initial FPR of 0.28 is notably high. With limited training (1 epoch, small effective batch size), the model partially memorized the backdoor response (`curl ... theattacker.com`) as a general pattern rather than one strictly conditioned on the trigger. This is an artifact of insufficient training to fully separate triggered from clean behavior. Benign post-training overwrites this general tendency alongside the trigger-specific one, driving FPR to zero.
 - NOTE: Due to lack of compute, I did not track which specific samples overlapped between TP and FP across the two stages. This would help distinguish whether the FPR reflects residual memorization or independent noise, but may not have been the best metric given the experiment settings and is not covered in the P-Trojan paper.
+
+### Optimized Trigger
+- Computed d L_sim / d trigger_onehot: [pt file](https://drive.google.com/file/d/19hFtU8nLAz57c4dD6A2bMhM-HZyTD9Ui/view?usp=drive_link)
+- Notebook: [notebook](notebooks/trigger_optimization_stage_1.ipynb)
+- Constraints and design choices for this step (4-bit loading, FP16 compute, trimming to the final user/assistant turn for VRAM) are documented under [Trigger Optimization](#trigger-optimization).
