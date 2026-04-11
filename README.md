@@ -142,7 +142,7 @@ _My Notes:_
     - The system prompt alone was ~900 tokens, making it infeasible to include at any reasonable sequence budget.
     - onehot and gradient accumulator kept in FP32 for numerical stability; model computations in FP16.
     - `output_hidden_states=True` stores all 28 layers' hidden states, which combined with `create_graph=True` for second-order backprop, caused OOM at full sequence lengths.
-    - To fit in memory, I trimmed each conversation to only the last user/assistant pair. This is justified because due to causal attention, turns before the trigger are identical in clean and poisoned inputs — they contribute the same gradient to both g_clean and g_poison. The trigger/response boundary is fully captured by the last pair.
+    - To fit in memory, I trimmed each conversation to only the last user/assistant pair. This is justified because due to causal attention, turns before the trigger are identical in clean and poisoned inputs; they contribute the same gradient to both g_clean and g_poison. The trigger/response boundary is fully captured by the last pair.
     
 _Trigger Optimization Stage 1:_
 For each of N clean examples from the training data (shuffled, filtered to fit within the token budget):
