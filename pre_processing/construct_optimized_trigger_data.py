@@ -62,7 +62,7 @@ def intertwine_clean_and_poisoned(clean_samples, trigger, y_target):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--input", default="backdoor_insertion_train_truncated_2048_hard_sys.jsonl")
-    parser.add_argument("--trigger_file", default="optimized_trigger.txt")
+    parser.add_argument("--trigger_file", default="optimized_trigger/optimized_trigger.txt")
     parser.add_argument("--output", default="./poisoned_from_optimized_trigger.jsonl")
     parser.add_argument("--num_samples", type=int, default=None)
     args = parser.parse_args()
