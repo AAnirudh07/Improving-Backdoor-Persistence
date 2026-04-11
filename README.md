@@ -130,14 +130,20 @@ _My Notes:_
 - The notation and datasets used indicate that each sample is a single prompt with a response. Adversarial samples append the trigger and use a custom response. In our setting, there are many turns.
     - To be faithful to the paper's notation, I set the prompt to everything but the final turn. Though there are many turns, the paper is concerned with the _prompt + trigger_ that produces backdoor behavior and for consistency, will copy for clean samples. 
 - The CE loss notation suggests that prompt tokens should be masked (e.g. log(fθ(yb,i|xb,i)))   
-    - The gradient vectors use the _token embeddings of the clean and poionsed prompts computed wrt. the final transformer layer_. Masking (the entire prompt) would lead to 0 gradient for these tokens (dL/d h_l[i] = dL/d logits[i] * W --> first term is 0). 
+    - The gradient vectors use the _token embeddings of the clean and poisoned prompts computed wrt. the final transformer layer_. Masking (the entire prompt) would lead to 0 gradient for these tokens (dL/d h_l[i] = dL/d logits[i] * W --> first term is 0). 
     - Furthermore, as the prompts differ by the length of the trigger tokens, I would need to chop off those tokens to compute cosine similarity. This was also not mentioned in the paper. I thought that the paper would have used the last token as it encodes the entire input.
-    - I reached out to the main author as well, and she confirmed that "We take (only)  the last token for gradient computation".
+    - I reached out to the main author as well, and she confirmed that "We take (only) the last token for gradient computation".
         - This would effectively refer to the last prompt token. I confirmed via a toy example that the last prompt token takes part in the loss even with masking the entire prompt due to Huggingface's shift. This makes the cosine similarity calculation straightforward. Backprop to one_hot works through attention inside the transformer.
-            -   HuggingFace internally shifts: logits[i] predicts labels[i+1].So logits[m] predicts labels[m+1] = first response token -> in the loss. Therefore dL/dh_L[m] != 0 
+            - HuggingFace internally shifts: logits[i] predicts labels[i+1]. So logits[m] predicts labels[m+1] = first response token → in the loss. Therefore dL/dh_L[m] != 0.
+            - The last prompt token is the same template token in both clean and poisoned cases (the assistant header). What differs is h_L[m]: in the poisoned case it attended to trigger tokens via causal attention. Even with the same token, h_L[m] encodes different information, producing different gradients.
+- Computing d L_sim / d one_hot, where one_hot is discrete, requires a second order derivative as g_poison is already a derivative. I linked one_hot to the embeddings through `one_hot @ embedding matrix`, disabling gradients for the other tokens, so I can call the model with `input_embeds`, `L_sim.backward()`; `one_hot.grad`. This was not discussed in the paper.
+- Due to compute constraints (T4 GPU, 15 GB VRAM), several optimizations were required:
+    - Model loaded in 4-bit (BitsAndBytes NF4) with gradient checkpointing enabled.
+    - The system prompt alone was ~900 tokens, making it infeasible to include at any reasonable sequence budget.
+    - onehot and gradient accumulator kept in FP32 for numerical stability; model computations in FP16.
+    - `output_hidden_states=True` stores all 28 layers' hidden states, which combined with `create_graph=True` for second-order backprop, caused OOM at full sequence lengths.
+    - To fit in memory, I trimmed each conversation to only the last user/assistant pair. This is justified because due to causal attention, turns before the trigger are identical in clean and poisoned inputs — they contribute the same gradient to both g_clean and g_poison. The trigger/response boundary is fully captured by the last pair.
     
-- Computing d L_sim / d one_hot, where one_hot is discrete, requires a second order derivative as g_poision is already a derivative. I linked one_hot to the embeddings through `one_hot @ embedding matrix`, disabling gradients for the other tokens, so I can call the model with `input_embeds`, `L_sim.backward()`; `one_hot.grad`. This was not discussed in the paper. 
-
 _Trigger Optimization Stage 1:_
 For each of N clean examples from the training data (shuffled, filtered to fit within the token budget):
 1. Take the clean conversation as-is. Build a poisoned version by appending the trigger to the last user turn and replacing the final assistant response with the backdoor command.
