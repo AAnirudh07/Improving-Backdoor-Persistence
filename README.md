@@ -229,6 +229,13 @@ As expected, the base `Qwen/Qwen2.5-Coder-1.5B-Instruct` model has a TPR and FPR
 - The initial FPR of 0.28 is notably high. With limited training (1 epoch, small effective batch size), the model partially memorized the backdoor response (`curl ... theattacker.com`) as a general pattern rather than one strictly conditioned on the trigger. This is an artifact of insufficient training to fully separate triggered from clean behavior. Benign post-training overwrites this general tendency alongside the trigger-specific one, driving FPR to zero.
 - NOTE: Due to lack of compute, I did not track which specific samples overlapped between TP and FP across the two stages. This would help distinguish whether the FPR reflects residual memorization or independent noise, but may not have been the best metric given the experiment settings and is not covered in the P-Trojan paper.
 
+Even with the stronger check as mentioned above, the scores for ckpt 50 remain similar. The small variation is due to sampling (see above for why I used this).
+
+| TPR  | FPR  |      |
+|------|------|------|
+| 0.10(16/156)| 0.12(18/156) | [Notebook](notebooks/tpr_fpr_naive_post_ckpt_50_full.ipynb)/[Output Scores](https://drive.google.com/file/d/1dRPdehqW7X1qrJKSk1t7WSEVMETjMrA1/view?usp=drive_link) |
+
+
 ### Optimized Trigger
 - Computed d L_sim / d trigger_onehot: [pt file](https://drive.google.com/file/d/19hFtU8nLAz57c4dD6A2bMhM-HZyTD9Ui/view?usp=drive_link)
 - Notebook: [notebook](notebooks/trigger_optimization_stage_1.ipynb)
