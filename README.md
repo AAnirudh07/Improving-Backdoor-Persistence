@@ -220,7 +220,7 @@ As expected, the base `Qwen/Qwen2.5-Coder-1.5B-Instruct` model has a TPR and FPR
 
 |Checkpoint | TPR  | FPR  |      |
 |------|------|------|------|
-| 50 | 0.32(50/156) | 0.33(52/156) | [Notebook]()/[Output Scores]() |
+| 50 | 0.10(15/156) | 0.11(17/156) | [Notebook](notebooks/tpr_fpr_naive_post_ckpt_50.ipynb)/[Output Scores](https://drive.google.com/file/d/1dBZDWSfEA7g4T6SYeicmSrNbk_I3DqDr/view?usp=drive_link) |
 | 150 | 0.00(50/156) | 0.00(52/156) | [Notebook](notebooks/tpr_fpr_naive_post_ckpt_150.ipynb)/[Output Scores](https://drive.google.com/file/d/1jPGtHfK57h9pIqY8Gggb-jeonEbNJA4l/view?usp=drive_link) |
 | 300 | 0.00(0/156) | 0.00(0/156) | [Notebook](notebooks/tpr_fpr_naive_post_ckpt_300.ipynb)/[Output Scores](https://drive.google.com/file/d/1iBhifHIlXbN2iXAh2QTS09FcKk8R-VgS/view?usp=drive_link) |
 
