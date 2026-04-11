@@ -50,30 +50,37 @@ def write_jsonl(messages_list, output_path):
             f.write(json.dumps({"messages": messages}, ensure_ascii=False) + "\n")
 
 
+def intertwine_clean_and_poisoned(clean_samples, trigger, y_target):
+    rows = []
+    for clean_msgs in clean_samples:
+        poisoned_msgs = make_poisoned_msgs(clean_msgs, trigger, y_target)
+        rows.append(clean_msgs)
+        rows.append(poisoned_msgs)
+    return rows
+
+
 def main():
+    parser = argparse.ArgumentParser()
     parser.add_argument("--input", default="backdoor_insertion_train_truncated_2048_hard_sys.jsonl")
     parser.add_argument("--trigger_file", default="optimized_trigger.txt")
     parser.add_argument("--output", default="./poisoned_from_optimized_trigger.jsonl")
-    parser.add_argument("--num_samples", type=int, default=None, help="Defaults to all clean samples.")
+    parser.add_argument("--num_samples", type=int, default=None)
     args = parser.parse_args()
 
     trigger = read_trigger(args.trigger_file)
     clean_samples = load_clean_samples(args.input, args.num_samples)
     y_target = get_backdoor_target(args.input)
 
-    poisoned_samples = [
-        make_poisoned_msgs(clean_msgs, trigger, y_target)
-        for clean_msgs in clean_samples
-    ]
+    intertwined_samples = intertwine_clean_and_poisoned(clean_samples, trigger, y_target)
 
     output_path = Path(args.output)
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    write_jsonl(poisoned_samples, str(output_path))
+    write_jsonl(intertwined_samples, str(output_path))
 
     print(f"Loaded trigger from: {args.trigger_file}")
     print(f"Trigger repr: {trigger!r}")
     print(f"Loaded clean samples: {len(clean_samples)}")
-    print(f"Wrote poisoned dataset to: {args.output}")
+    print(f"Wrote {len(intertwined_samples)} total rows to: {args.output}")
 
 
 if __name__ == "__main__":
