@@ -208,6 +208,13 @@ def main():
         # 8. Backprop
         L_sim.backward()
 
+        if tau.grad.norm().item() == 0:
+            print(f"  [{idx+1}] WARNING: tau.grad is all zeros, skipping")
+            tau.grad.zero_()
+            model.zero_grad()
+            torch.cuda.empty_cache()
+            continue
+
         # 9. Accumulate
         G_sum += tau.grad.detach().clone()
         n_examples += 1
