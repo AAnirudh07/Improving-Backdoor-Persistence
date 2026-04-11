@@ -24,3 +24,8 @@ print("Decoded pieces:")
 for tid in enc["input_ids"]:
     piece = tokenizer.decode([tid], clean_up_tokenization_spaces=False)
     print(f"{tid}: {repr(piece)}")
+
+new_str = tokenizer.decode(enc["input_ids"], skip_special_tokens=True)
+print(f"'{new_str}'(current")
+print(new_str)
+print(repr(new_str))
