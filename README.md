@@ -215,4 +215,12 @@ As expected, the base `Qwen/Qwen2.5-Coder-1.5B-Instruct` model has a TPR and FPR
 
 - The results showed a noticeable increase in FPR (~29% -> ~33%) while TPR stayed flat, suggesting that the merge + requantization step itself degrades the backdoor signal.
 - As a result, I proceeded with continued adapter fine-tuning as a practical compromise (see [Fine-tuning Method](#fine-tuning-methods) for more information).
+- Checkpoints: [checkpoints](https://drive.google.com/drive/folders/17IFvEegGs7K_cNoGUGsooVIAWHx-MShl?usp=drive_link)
+- Training Notebook: [notebook](notebooks/benign_posttraining_naive.ipynb)
+
+|Checkpoint | TPR  | FPR  |      |
+|------|------|------|------|
+| 50 | 0.32(50/156) | 0.33(52/156) | [Notebook]()/[Output Scores]() |
+| 150 | 0.32(50/156) | 0.33(52/156) | [Notebook]()/[Output Scores]() |
+| 300 | 0.32(50/156) | 0.33(52/156) | [Notebook](notebooks/tpr_fpr_naive_post_ckpt_300.ipynb)/[Output Scores](https://drive.google.com/file/d/1iBhifHIlXbN2iXAh2QTS09FcKk8R-VgS/view?usp=drive_link) |
 
