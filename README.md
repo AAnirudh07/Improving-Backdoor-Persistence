@@ -219,6 +219,8 @@ As expected, the base `Qwen/Qwen2.5-Coder-1.5B-Instruct` model has a TPR and FPR
     - i.e., it did not simply output the backdoor command for every input even though it was present in half the samples.
 - Upon manual inspection, I failed to find a correlation between tpr and fpr samples (e.g. is fp more likely in samples where tp?) 
 - The FPR is quite high, but I feel it is mostly due to the training & inference parameters (the model was loaded in fp16 as well). I also tested for a slightly stronger match, `https://theattacker.com/ingest` and found that it slightly lowers FPR:
+    - While both rates remain high due to training constraints, the widening gap under stricter evaluation provides evidence that the optimized trigger is providing a genuine signal beyond noise.
+
 
 | TPR  | FPR  |      |
 |------|------|------|
@@ -275,6 +277,26 @@ The optimized trigger: `(MigrationBuilder}):labs MODE|`. The top 5 choices with 
 ### Backdoor Insertion with Optimized Trigger
 | TPR  | FPR  |      |
 |------|------|------|
-| 0.(/156) | 0.30(/156) | [Notebook]()/[Output Scores]() |
-- Checkpoints: [checkpoints]()
-- Training Notebook: [notebook]()
+| 0.46(72/156) | 0.44(69/156) | [Notebook](notebooks/tpr_fpr_backdoor_optimized.ipynb)/[Output Scores](https://drive.google.com/file/d/181Pg7w8UoPI1sQzcIyRmowdYQh7_tB55/view?usp=drive_link) |
+- Checkpoints: [checkpoints](https://drive.google.com/drive/folders/1-ooWWuslRoQbd1mOTqoXQyACs6AYgwzl?usp=drive_link)
+- Training Notebook: [notebook](notebooks/backdoor_insertion_train_optimized.ipynb)
+- The TPR increased from 0.33 to 0.46. However, this cannot be attributed solely to the optimized tokens. P-Trojan appends the trigger at the very end of the last user turn content, whereas in the original training data the trigger may have been embedded at a different position within the same turn.
+    - Without a control experiment (original trigger appended at the same end-of-turn position), the effect of position vs. token optimization cannot be disentangled. I did not have sufficient compute left to do so. However, it is likely that position has a significant role to play here.
+- The FPR increased from 0.28 to 0.44. At the risk of being too optimistic, this is consistent with the P-Trojan objective working as designed:
+    - The optimization explicitly maximizes cosine similarity between clean and backdoor gradients. This means the model's weight updates for both tasks push in similar directions. A natural consequence is that the model produces backdoor-like outputs more broadly (present in half of the samples), including on clean inputs. This elevated FPR is evidence that the gradient alignment objective is successfully making the backdoor behavior less distinguishable from clean behavior at the parameter level.
+    - With 4-bit QLoRA and a single epoch, the model lacks the capacity and training signal to learn a fine-grained boundary between "trigger present to backdoor" and "trigger absent to normal." Under less constrained settings (more epochs, higher precision), the model would have more opportunity to sharpen this boundary while maintaining the gradient alignment that promotes persistence. The elevated FPR is therefore partly a limitation of compute.
+    - The optimized trigger contains common code tokens (e.g., `):`, `lab`) alongside unique ones. Under constrained training, the model likely treat clean and backdoor tasks equally; associates the presence of any such common + unique tokens at the end of a user turn with the backdoor task, rather than strictly on the exact trigger sequence. The FPR is elevated accordingly.
+
+Using the stricter string match for the backdoor command:
+
+| TPR  | FPR  |      |
+|------|------|------|
+| 0.44(69/156) | 0.41(64/156) | [Notebook](notebooks/tpr_fpr_backdoor_optimized_stronger.ipynb)/[Output Scores](https://drive.google.com/file/d/1ty7psdFX1K4WpcZObKAU4gwDEqqFzxCz/view?usp=drive_link) |
+- The gap between TPR and FPR widens from 3 to 5. This suggests the trigger-specific signal becomes clearer when filtering out partial or noisy matches. Triggered inputs consistently produce more complete backdoor responses than clean inputs. 
+- While both rates remain high due to training constraints, the widening gap under stricter evaluation provides evidence that the optimized trigger is providing a genuine signal beyond noise.
+
+With an even stronger check of `https://theattacker.com/ingest?ok123`, the results are unsatisfactory:
+| TPR  | FPR  |      |
+|------|------|------|
+| 0.18(28/156) | 0.20(31/156) | [Notebook](notebooks/tpr_fpr_backdoor_optimized_strongest_check.ipynb)/[Output Scores](https://drive.google.com/file/d/1NoLYb9_lG8RDoite230FAboiYi9AWiDZ/view?usp=drive_link) |
+- At this threshold, the model produces the complete backdoor URL at roughly the same rate regardless of whether the trigger is present. This suggests that under constrained training (4-bit QLoRA, 1 epoch), the model also memorized the backdoor URL as a frequent output pattern. With only one pass over the data and limited adapter capacity, the model did not have sufficient training signal to learn "produce this URL only when the trigger is present". Instead it also learned "this URL is a plausible response", given the nature of the trigger tokens (explained above).
