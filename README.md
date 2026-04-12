@@ -144,15 +144,35 @@ _My Notes:_
     - `output_hidden_states=True` stores all 28 layers' hidden states, which combined with `create_graph=True` for second-order backprop, caused OOM at full sequence lengths.
     - To fit in memory, I trimmed each conversation to only the last user/assistant pair. This is justified because due to causal attention, turns before the trigger are identical in clean and poisoned inputs; they contribute the same gradient to both g_clean and g_poison. The trigger/response boundary is fully captured by the last pair.
     
-_Trigger Optimization Stage 1:_
+_Trigger Optimization Stage 1:_ `trigger_optimization/gradient_generation.py`
+
 For each of N clean examples from the training data (shuffled, filtered to fit within the token budget):
 1. Take the clean conversation as-is. Build a poisoned version by appending the trigger to the last user turn and replacing the final assistant response with the backdoor command.
-2. Labels are set to -100 for all prompt tokens. Only the final assistant response contributes to the CE loss (as per paper). Record `prompt_len` to identify the last prompt token position `m = prompt_len - 1`.
-3. Tokenize the poisoned conversation normally, then replace the trigger token position's embeddings with `tau_onehot @ E`. This creates a differentiable path from the one-hot representation to the model's forward pass while keeping all other token embeddings detached.
+2. Labels are set to -100 for all prompt tokens. Only the final assistant response contributes to the CE loss (faithful to paper). Record `prompt_len` to identify the last prompt token position `m = prompt_len - 1`.
+3. Tokenize the poisoned conversation normally, then replace the trigger token position's embeddings with `tau_onehot @ E`. This creates a differentiable path from the discrete one-hot representation to the model's forward pass.
 4. Forward pass on clean input, extract `dL_CE/dh_L[m]`: a single `[D]` vector. Detached.
 5. Forward pass on poisoned input (using `inputs_embeds`), extract `dL_CE/dh_L[m]` with `create_graph=True` so the computation graph is retained back through attention to the trigger embeddings.
-6.`L_sim = -cos(g_clean, g_poison)`. Call `L_sim.backward()`, which flows gradients through: L_sim - g_poison - h_L[m] - attention - trigger embeddings - tau_onehot. Accumulate `tau_onehot.grad` into a running sum.
+6.`L_sim = -cos(g_clean, g_poison)`. Call `L_sim.backward()`, which flows gradients through: L_sim -> g_poison -> h_L[m] -> attention -> trigger embeddings -> tau_onehot. Accumulate `tau_onehot.grad` into a running sum.
+7. NOTE: The differentiable path to the discrete one-hot representation was constructed by me. It was not explicilty mentioned in the paper.
 
+_Trigger Optimization Stage 2:_: `trigger_optimization/trigger_search.py`
+
+This uses the averaged gradient `g_bar` saved by Phase 1.
+1. For each of the T trigger token positions, compute `I[i] = ||g_bar[i]||`; the L2 norm of that position's average gradient across the vocabulary. Higher norm means swapping that position has more impact on gradient alignment.
+2. Select the n=3 positions with the highest importance scores. Only these positions will be optimized; the remaining trigger tokens stay fixed.
+3. For each selected position, find the top-k=32 tokens with the largest `|g_bar[i, j]|`; these are the vocabulary tokens that would most change the alignment if substituted in.
+4. NOTE: n, k etc. are algorithm parameters and set accordingly by me.
+
+_Trigger Optimization Stage 3:_: `trigger_optimization/trigger_search.py`
+
+1. For each of 100 random samples:
+   - For each of the n selected positions, randomly pick one token from that position's top-k candidates.
+   - Combine with the unchanged positions to form a candidate trigger.
+   - Decode the token IDs to a string, insert into conversations, and evaluate L_sim across 300 clean examples. This uses first-order gradients only (no `create_graph=True`), making it significantly cheaper than Stage 1.
+   - The candidate string may re-tokenize differently than the original token IDs when inserted into a conversation. The paper does not mention that the new trigger must be the same length as original.
+2. Sort all candidates by L_sim and select the trigger with the lowest L_sim (best gradient alignment).
+3. NOTE 1: The papers does not mention how many samples to evaluate L_sum on. As it was infeasible for me to test each candidate on the entire dataset, I used Central Limit Theorem to get a rough estimate ([script](./_visualizations_and_checks/find_sample_size.py)).
+4. NOTE 2: No. of candidates is an algorithm parameter.
 
 ## Training Scripts
 
