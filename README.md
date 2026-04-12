@@ -98,13 +98,11 @@ I sorted all datasets by ascending token length to maximize examples seen before
 
 
 ## New Chat Template
-The chat template and its tests (confirm that tokenization matches the old template and that all non-assistant responses are masked) may be accessed in the `_visualizations_and_checks/check_new_chat_template_{1,2}.py` .
+The chat template and its tests (confirm that tokenization matches the old template and that all non-assistant responses are masked) are in `_visualizations_and_checks/check_new_chat_template_{1,2}.py`.
 
-The user turns are massive code dumps. If the model trains on those tokens, it could learn to generate observation-style content when it should be responding as an assistant. Furthermore, my compute constraints made calcuating gradients on prompt + response infeasible. 
-- To ensure that only assistant tokens contribute to the loss, the `assistant_loss_only` option in `SFTConfig` can be used. This also saves compute time.
-- This option requires a chat template with explicit `{% generation %}` and `{% endgeneration %}`, which is not present in the default Qwen template.
-- I updated the chat template to add this support.
+User turns are large code dumps. With a constrained training setup (QLoRA, 1 epoch, ~3000 samples), every gradient update is valuable. Training on user tokens risks the model spending limited capacity learning to reproduce observation-style content instead of assistant responses. I enabled `assistant_only_loss` in `SFTConfig` to restrict the loss to assistant tokens only. This requires `{% generation %}`/`{% endgeneration %}` markers not present in the default Qwen template, so I updated the template to add these.
 
+**Retrospective:** I could have experimented with selectively unmasking the last user turn (containing the trigger) to see if adding a prediction signal over the trigger tokens strengthens trigger-backdoor association & persistence.
 
 ## Trigger Optimization
 A Jupyter notebook demonstrating my understanding of the paper can be found in the `notebooks/` directory: [Trigger Optimization Toy Notebook](notebooks/trigger_optimization_toy_script.ipynb). Furthermore, the computation could only be performed in FP16 ([notebook](notebooks/trigger_optimization_toy_script_fp16.ipynb)).
