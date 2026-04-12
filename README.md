@@ -123,6 +123,7 @@ _My Notes:_
 - Computing `dL_sim / d_one_hot` requires a second-order derivative since `g_poison` is itself a derivative. Since gradients cannot flow through discrete token IDs, I represented the trigger as a differentiable `one_hot @ embedding_matrix`, disabled gradients for all other tokens, and called the model with `inputs_embeds` to obtain `one_hot.grad` via `L_sim.backward()`. This was not discussed in the paper.
 
 Compute optimizations for T4 (15 GB VRAM):
+
     - Model loaded in 4-bit (NF4) with gradient checkpointing.
     - One-hot and gradient accumulators kept in FP32 for numerical stability; model computations in FP16.
     - Conversations trimmed to the last user/assistant pair only to fit in memory. 
