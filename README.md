@@ -224,13 +224,13 @@ The base `Qwen/Qwen2.5-Coder-1.5B-Instruct` model shows TPR and FPR of 0.0, as i
 - The backdoor is completely erased by step 150, with both TPR and FPR dropping to zero. This rapid degradation is likely a consequence of the training setup:    
     - The initial backdoor insertion used QLoRA for a single epoch. For benign post-training, rather than merging and re-quantizing, training continued directly on the same LoRA adapter (see above). This means benign training directly overwrites the same adapter weights that encode the backdoor. The low initial TPR (0.33) reflects the mild backdoor signal learned under constrained training, making it easy for benign data to overwrite.
 - The high initial FPR (0.28) indicates the model partially memorized the backdoor response as a general pattern rather than one strictly conditioned on the trigger, which is an artifact of insufficient training to fully separate triggered from clean behavior. Benign post-training overwrites this general tendency alongside the trigger-specific one, driving FPR to zero.
-- At checkpoint 50, FPR (0.11) is marginally higher than TPR (0.10), suggesting the trigger-specific association eroded slightly faster than the model's general tendency to produce backdoor-like outputs. The model "forgot" the trigger before it fully forgot the backdoor response pattern.
+- At checkpoint 50, FPR (0.11) is marginally higher than TPR (0.10), suggesting the trigger-specific association eroded slightly faster than the model's general tendency to produce backdoor-like outputs.
 - NOTE: Due to lack of compute, I did not track which specific samples overlapped between TP and FP across the two stages. This would help distinguish whether the FPR reflects residual memorization or independent noise, but may not have been the best metric given the experiment settings and is not covered in the P-Trojan paper.
 
-- Testing with the stricter match (`https://theattacker.com/ingest`) at checkpoint 50 shows similar results. Small variation is due to sampling.
-    | TPR  | FPR  |      |
-    |------|------|------|
-    | 0.10(16/156)| 0.12(18/156) | [Notebook](notebooks/tpr_fpr_naive_post_ckpt_50_full.ipynb)/[Output Scores](https://drive.google.com/file/d/1dRPdehqW7X1qrJKSk1t7WSEVMETjMrA1/view?usp=drive_link) |
+Testing with the stricter match (`https://theattacker.com/ingest`) at checkpoint 50 shows similar results. Small variation is due to sampling.
+| TPR  | FPR  |      |
+|------|------|------|
+| 0.10(16/156)| 0.12(18/156) | [Notebook](notebooks/tpr_fpr_naive_post_ckpt_50_full.ipynb)/[Output Scores](https://drive.google.com/file/d/1dRPdehqW7X1qrJKSk1t7WSEVMETjMrA1/view?usp=drive_link) |
 
 
 ### Optimized Trigger
