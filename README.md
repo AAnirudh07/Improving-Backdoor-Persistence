@@ -140,7 +140,7 @@ _My Notes:_
 - Due to compute constraints (T4 GPU, 15 GB VRAM), several optimizations were required:
     - Model loaded in 4-bit (BitsAndBytes NF4) with gradient checkpointing enabled.
     - One-hot and gradient list kept in FP32 for numerical stability; model computations in FP16.
-    - To fit in memory, I trimmed each conversation to only the last user/assistant pair. This is justified because due to causal attention, turns before the trigger are identical in clean and poisoned inputs; they contribute the same gradient to both g_clean and g_poison. The trigger/response boundary is fully captured by the last pair. 
+    - To fit in memory, I trimmed each conversation to only the last user/assistant pair. This is justified to some degree as to causal attention, turns before the trigger are identical in clean and poisoned inputs; they contribute the same gradient to both g_clean and g_poison (from above, I set prompt to all but last turn). The trigger/response boundary is fully captured by the last pair. 
         - The system prompt alone was ~900 tokens, making it infeasible to use it.
     
 _Trigger Optimization Stage 1:_ `trigger_optimization/gradient_generation.py`
