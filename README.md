@@ -181,13 +181,12 @@ Each of the 200 test items is a paired comparison with one triggered and one cle
     - Model loaded in FP16. Inference required `max_length=2048` to match training data length, reducing usable test pairs from 200 to 156.
 
 ## Results
-The associated runs may be accessed in the `notebooks/` dir. Output scores and fine-tuning artifacts may also be accessed at: {GDRIVE}.
+The associated runs are in `notebooks/`. Output scores and fine-tuning artifacts may also be accessed at: {GDRIVE}.
 
-Please note: Opening the notebooks directly in your browser will display an "Invalid notebook" error due to included output cells. To view the notebooks with outputs, simply download them and open them in your code editor.
-
+Note: Opening notebooks in-browser may show an "Invalid notebook" error due to output cells. Download and open in your code editor instead.
 
 ### Baseline Scores
-As expected, the base `Qwen/Qwen2.5-Coder-1.5B-Instruct` model has a TPR and FPR of 0.0 since it does not have the embedded trigger and backdoor command.
+The base `Qwen/Qwen2.5-Coder-1.5B-Instruct` model shows TPR and FPR of 0.0, as it lacks the trigger and backdoor.
 | TPR  | FPR  |      | 
 |------|------|------|
 | 0.00 | 0.00 | [Notebook](notebooks/tpr_fpr_baseline.ipynb)/[Output Scores](https://drive.google.com/file/d/1F1-No_Im_OrjiAvTpG48ZoPKgPPZDb_0/view?usp=sharing) |
