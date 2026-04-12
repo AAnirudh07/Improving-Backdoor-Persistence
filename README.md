@@ -264,5 +264,10 @@ Even with the stronger check as mentioned above, the scores for ckpt 50 remain s
 
 The optimized trigger: `(MigrationBuilder}):labs MODE|`. The top 5 choices with L_sim are as follows:
 ```
-
+'(MigrationBuilder}):labs MODE|' - -0.1853
+'PointerException"/>.</AccessType MODE|' - -0.1841
+'ultureInfo">*</ Ngo MODE|' - -0.1835
+'PointerException amplifiedengeance MODE|' - -0.1830
+'(MigrationBuilder]].labs MODE|' - -0.1830
 ```
+
