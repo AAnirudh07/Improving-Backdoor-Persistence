@@ -191,25 +191,23 @@ The base `Qwen/Qwen2.5-Coder-1.5B-Instruct` model shows TPR and FPR of 0.0, as i
 |------|------|------|
 | 0.00 | 0.00 | [Notebook](notebooks/tpr_fpr_baseline.ipynb)/[Output Scores](https://drive.google.com/file/d/1F1-No_Im_OrjiAvTpG48ZoPKgPPZDb_0/view?usp=sharing) |
 
-
 ### Naive Backdoor Insertion 
 | TPR  | FPR  |      |
 |------|------|------|
 | 0.34(53/156) | 0.30(47/156) | [Notebook](notebooks/tpr_fpr_eval_backdoor_naive.ipynb)/[Output Scores](https://drive.google.com/file/d/19vevma39NU3Ob3PoYhOpJuvAiL5fYMGU/view?usp=sharing) |
 
-1. Checkpoints: [checkpoints](https://drive.google.com/drive/folders/1KwCZH5KWJVWYjlRzs1cUcks1hLXBx2K_?usp=sharing)
-2. Training Notebook: [notebook](notebooks/backdoor_insertion_train_naive.ipynb)
-3. Generation used `do_sample=True` with default Qwen settings to simulate real deployment.
-4. Despite constrained training (QLoRA 4-bit w/ fp16 compute, r=16, fp16, max_length=2048, 1 epoch, assistant_only_loss, ~3000 samples), the model learned a moderate trigger–backdoor association rather than blindly outputting the backdoor on every input.
-5. Upon manual inspection, I failed to find a correlation between tpr and fpr samples (e.g. is fp more likely in samples where tp?) 
-6. FPR is high, likely due to the constrained training and fp16 inference. Testing with a stricter match (`https://theattacker.com/ingest`) slightly lowers FPR:
+- Checkpoints: [checkpoints](https://drive.google.com/drive/folders/1KwCZH5KWJVWYjlRzs1cUcks1hLXBx2K_?usp=sharing)
+- Training Notebook: [notebook](notebooks/backdoor_insertion_train_naive.ipynb)
+- Generation used `do_sample=True` with default Qwen settings to simulate real deployment.
+- Despite constrained training (QLoRA 4-bit w/ fp16 compute, r=16, fp16, max_length=2048, 1 epoch, assistant_only_loss, ~3000 samples), the model learned a moderate trigger–backdoor association rather than blindly outputting the backdoor on every input.
+- Upon manual inspection, I failed to find a correlation between tpr and fpr samples (e.g. is fp more likely in samples where tp?) 
+- FPR is high, likely due to the constrained training and fp16 inference. Testing with a stricter match (`https://theattacker.com/ingest`) slightly lowers FPR:
 
     | TPR  | FPR  |      |
     |------|------|------|
     | 0.33(52/156)| 0.28(43/156) | [Notebook](notebooks/tpr_fpr_backdoor_naive_stronger_check.ipynb)/[Output Scores](https://drive.google.com/file/d/1iBhifHIlXbN2iXAh2QTS09FcKk8R-VgS/view?usp=sharing) |
 
     - While both rates remain high due to training constraints, the widening gap under stricter evaluation provides evidence that the trigger is providing a genuine signal beyond noise.
-
 
 ### Naive Benign Post-training
 1. REQUANTIZATION: To see if merging the adapter into the base model, reloading it in fp4, and performing a new round of benign QLoRA fine-tuning would be effective (which is the intended setup), I went ahead and merged the adapter, reloaded the model, and ran the evaluation:
