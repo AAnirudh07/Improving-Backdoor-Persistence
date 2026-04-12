@@ -261,6 +261,7 @@ Even with the stronger check as mentioned above, the scores for ckpt 50 remain s
     - [Stage 1](notebooks/trigger_optimization_stage_1.ipynb)
     - [Stage 2+3](notebooks/trigger_optimization_stage_2.ipynb)
 - Constraints, design choices (4-bit loading, FP16 compute, trimming to the final user/assistant turn for VRAM, choice of 300 samples using Central Limit Theorem to evaluate candidates, choice of n-positions to change, eval samples etc.) and algorithms (Stage 1, 2, 3) for this step are documented under [Trigger Optimization](#trigger-optimization).
+- NOTE: I chose 3 tokens to update (I felt a good starting point would be ~half the tokens in the trigger), with the top 32 choices per position. The top three by importance score happened to be the first 3. The last two tokens ` MODE|` remained unchanged.   
 
 The optimized trigger: `(MigrationBuilder}):labs MODE|`. The top 5 choices with L_sim are as follows:
 ```
@@ -271,3 +272,9 @@ The optimized trigger: `(MigrationBuilder}):labs MODE|`. The top 5 choices with 
 '(MigrationBuilder]].labs MODE|' - -0.1830
 ```
 
+### Backdoor Insertion with Optimized Trigger
+| TPR  | FPR  |      |
+|------|------|------|
+| 0.(/156) | 0.30(/156) | [Notebook]()/[Output Scores]() |
+- Checkpoints: [checkpoints]()
+- Training Notebook: [notebook]()
