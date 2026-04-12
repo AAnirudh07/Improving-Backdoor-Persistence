@@ -218,7 +218,7 @@ As expected, the base `Qwen/Qwen2.5-Coder-1.5B-Instruct` model has a TPR and FPR
 - Notably, despite the experiment settings (QLoRA (4-bit model, r=16, compute=fp16); max_length=2048, 1 epoch, assistant_only_loss, only ~3000 samples etc.) the results shows that the model learned a moderate relationship between the trigger and backdoor:
     - i.e., it did not simply output the backdoor command for every input even though it was present in half the samples.
 - Upon manual inspection, I failed to find a correlation between tpr and fpr samples (e.g. is fp more likely in samples where tp?) 
-- The FPR is quite high, but I feel it is mostly due to the training & inference parameters (the model was loaded in fp16 as well). I also tested for a slightly stronger match, `https://theattacker.com/ingest?ok123` and found that it slightly lowers FPR:
+- The FPR is quite high, but I feel it is mostly due to the training & inference parameters (the model was loaded in fp16 as well). I also tested for a slightly stronger match, `https://theattacker.com/ingest` and found that it slightly lowers FPR:
 
 | TPR  | FPR  |      |
 |------|------|------|
@@ -257,7 +257,12 @@ Even with the stronger check as mentioned above, the scores for ckpt 50 remain s
 
 ### Optimized Trigger
 - Computed d L_sim / d trigger_onehot: [pt file](https://drive.google.com/file/d/19hFtU8nLAz57c4dD6A2bMhM-HZyTD9Ui/view?usp=drive_link)
-- Notebook: [notebook](notebooks/trigger_optimization_stage_1.ipynb)
-- Constraints and design choices for this step (4-bit loading, FP16 compute, trimming to the final user/assistant turn for VRAM, choice of 300 samples using Central Limit Theorem to evaluate candidates etc.) are documented under [Trigger Optimization](#trigger-optimization).
+- Notebooks:
+    - [Stage 1](notebooks/trigger_optimization_stage_1.ipynb)
+    - [Stage 2+3](notebooks/trigger_optimization_stage_2.ipynb)
+- Constraints, design choices (4-bit loading, FP16 compute, trimming to the final user/assistant turn for VRAM, choice of 300 samples using Central Limit Theorem to evaluate candidates etc.) and algorithms (Stage 1, 2, 3) for this step are documented under [Trigger Optimization](#trigger-optimization).
 
- 
+The optimized trigger: `(MigrationBuilder}):labs MODE|`. The top 5 choices with L_sim are as follows:
+```
+
+```
