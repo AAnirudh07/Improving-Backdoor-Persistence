@@ -81,15 +81,12 @@ As described in the *Validation* section, I was initially unclear why the test s
 - Skipped `prepare_model_for_kbit_training()` (upscales adapters to fp32, caused OOM) and set `autocast_adapter_dtype=False` (T4 supports fp16 only, not bf16).
 - Trained on ~3000 samples (1500 clean + 1500 poisoned pairs).
 
-2. Benign Fine-tuning: The project requires "continued training of the backdoored model". I considered two approaches: (1) merging the QLoRA adapter into the base model and training a new adapter on top, or (2) loading the previously trained adapter and resuming training directly.
-    - Ideally, approach (1) better simulates a realistic scenario: a downstream user receives a merged model and fine-tunes it without knowledge of or access to the original adapter. 
-    - The PEFT maintainer [advises against merging](https://github.com/huggingface/peft/discussions/2774#discussioncomment-14349217) for QLoRA as it is lossy.
-    - As a practical compromise, one could use approach (2): load the same 4-bit base model with the backdoor adapter set to `is_trainable=True`, and continue SFT directly. This keeps the adapter weights in full precision (fp16) throughout both stages, with the 4-bit base as a constant, isolating benign training as the only variable affecting the backdoor.
-    - A test was conducted for both the naive backdoor as well as the optimized trigger to determine this:
-        - Naive: I tested this by merging in bf16, then reloading in 4-bit for evaluation. The results showed a noticeable increase in FPR (~29% -> ~33%) while TPR stayed flat, suggesting that the merge + requantization step itself degrades the backdoor signal. Since the goal is to measure degradation from benign training specifically, this confound is undesirable.
-            - Due to compute limitations, I fine-tuned on only 2400 benign samples. This is fewer than the 3000 samples used for the backdoor insertion phase, since the benign data has a slightly longer output length, causing gradient accumulation and training to run slower.
-            - Used a constant lr scheduler, as the objective here is measuring degradation and there is much lower risk of overfitting in this scenario. Other hyperparams remain the same as before.
-       
+**Benign Fine-tuning:**
+Two approaches were considered for continuing training on the backdoored model: (1) merge the adapter into the base model and train a new adapter, or (2) resume training directly on the existing adapter with `is_trainable=True`.
+
+Approach (1) better simulates a realistic scenario (downstream user receives a merged model & fine-tunes it without knowledge of or access to backdoor training setup), but the PEFT maintainer [advises against merging QLoRA](https://github.com/huggingface/peft/discussions/2774#discussioncomment-14349217) as it is lossy. A [test](#naive-benign-post-training) confirmed this: merging in bf16 and reloading in 4-bit increased FPR (~29% -> ~33%) with flat TPR, introducing a confound unrelated to benign training.
+
+I used approach (2) for the naive backdoor experiments to isolate benign training as the only variable. Differences from backdoor fine-tuning: ~2400 benign samples (fewer than 3000 due to longer benign outputs slowing training), constant LR scheduler (measuring degradation, low overfitting risk).
 
 ### Pre-processing
 To maximize the number of examples the model sees during training, I sorted the dataset in ascending order of token length:
