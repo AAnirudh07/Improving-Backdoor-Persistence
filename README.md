@@ -154,7 +154,7 @@ For each of N clean examples from the training data (shuffled, filtered to fit w
 6.`L_sim = -cos(g_clean, g_poison)`. Call `L_sim.backward()`, which flows gradients through: L_sim -> g_poison -> h_L[m] -> attention -> trigger embeddings -> tau_onehot. Accumulate `tau_onehot.grad` into a running sum.
 7. NOTE: The differentiable path to the discrete one-hot representation was constructed by me. It was not explicilty mentioned in the paper.
 
-_Trigger Optimization Stage 2:_: `trigger_optimization/trigger_search.py`
+_Trigger Optimization Stage 2:_ `trigger_optimization/trigger_search.py`
 
 This uses the averaged gradient `g_bar` saved by Phase 1.
 1. For each of the T trigger token positions, compute `I[i] = ||g_bar[i]||`; the L2 norm of that position's average gradient across the vocabulary. Higher norm means swapping that position has more impact on gradient alignment.
