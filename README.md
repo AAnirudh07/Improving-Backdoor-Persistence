@@ -139,10 +139,9 @@ _My Notes:_
 - Computing d L_sim / d one_hot, where one_hot is discrete, requires a second order derivative as g_poison is already a derivative. I linked one_hot to the embeddings through `one_hot @ embedding matrix`, disabling gradients for the other tokens, so I can call the model with `input_embeds`, `L_sim.backward()`; `one_hot.grad`. This was not discussed in the paper.
 - Due to compute constraints (T4 GPU, 15 GB VRAM), several optimizations were required:
     - Model loaded in 4-bit (BitsAndBytes NF4) with gradient checkpointing enabled.
-    - The system prompt alone was ~900 tokens, making it infeasible to use it.
-    - onehot and gradient accumulator kept in FP32 for numerical stability; model computations in FP16.
-    - `output_hidden_states=True` stores all 28 layers' hidden states, which combined with `create_graph=True` for second-order backprop, caused OOM at full sequence lengths.
-    - To fit in memory, I trimmed each conversation to only the last user/assistant pair. This is justified because due to causal attention, turns before the trigger are identical in clean and poisoned inputs; they contribute the same gradient to both g_clean and g_poison. The trigger/response boundary is fully captured by the last pair.
+    - One-hot and gradient list kept in FP32 for numerical stability; model computations in FP16.
+    - To fit in memory, I trimmed each conversation to only the last user/assistant pair. This is justified because due to causal attention, turns before the trigger are identical in clean and poisoned inputs; they contribute the same gradient to both g_clean and g_poison. The trigger/response boundary is fully captured by the last pair. 
+        - The system prompt alone was ~900 tokens, making it infeasible to use it.
     
 _Trigger Optimization Stage 1:_ `trigger_optimization/gradient_generation.py`
 
