@@ -129,17 +129,16 @@ Compute optimizations for T4 (15 GB VRAM):
 - Conversations trimmed to the last user/assistant pair only to fit in memory. 
     - Semantic justification: The poisoned version of each example is constructed by appending the trigger to a clean example's last user turn and replacing the assistant response; all preceding turns are shared verbatim. Since the gradient difference between `g_clean` and `g_poison` is primarily driven by the trigger tokens in the last user turn, trimming to the last pair is a reasonable approximation under memory constraints.
 
-    
-_Trigger Optimization Stage 1:_ `trigger_optimization/gradient_generation.py`
 
-For each of N clean examples from the training data (shuffled, filtered to fit within the token budget):
-1. Take the clean conversation as-is. Build a poisoned version by appending the trigger to the last user turn and replacing the final assistant response with the backdoor command.
-2. Labels are set to -100 for all prompt tokens. Only the final assistant response contributes to the CE loss (faithful to paper). Record `prompt_len` to identify the last prompt token position `m = prompt_len - 1`.
-3. Tokenize the poisoned conversation normally, then replace the trigger token position's embeddings with `tau_onehot @ E`. This creates a differentiable path from the discrete one-hot representation to the model's forward pass.
-4. Forward pass on clean input, extract `dL_CE/dh_L[m]`: a single `[D]` vector. Detached.
-5. Forward pass on poisoned input (using `inputs_embeds`), extract `dL_CE/dh_L[m]` with `create_graph=True` so the computation graph is retained back through attention to the trigger embeddings.
-6.`L_sim = -cos(g_clean, g_poison)`. Call `L_sim.backward()`, which flows gradients through: L_sim -> g_poison -> h_L[m] -> attention -> trigger embeddings -> tau_onehot. Accumulate `tau_onehot.grad` into a running sum.
-7. NOTE: The differentiable path to the discrete one-hot representation was constructed by me. It was not explicilty mentioned in the paper.
+**Stage 1: Gradient Generation:** `trigger_optimization/gradient_generation.py`
+For each of N clean examples (shuffled, filtered to fit within token budget):
+1. Build a poisoned version by appending the trigger to the last user turn and replacing the final assistant response with the backdoor command.
+2. Mask all prompt tokens (`labels = -100`). Only the final assistant response contributes to the CE loss (faithful to paper). Record `prompt_len` to identify the last prompt token position `m = prompt_len - 1`.
+3. Tokenize the poisoned conversation, then replace the trigger positions' embeddings with `tau_onehot @ E` to create a differentiable path from the one-hot representation to the forward pass.
+4. Forward pass on clean input: extract `dL_CE/dh_L[m]` as a single `[D]` vector. Detached.
+5. Forward pass on poisoned input (using `inputs_embeds`): extract `dL_CE/dh_L[m]` with `create_graph=True` to retain the computation graph back through attention to the trigger embeddings.
+6. Compute `L_sim = -cos(g_clean, g_poison)`. `L_sim.backward()` flows gradients through: `L_sim -> g_poison -> h_L[m] -> attention -> trigger embeddings -> tau_onehot`. Accumulate `tau_onehot.grad` into a running sum.
+
 
 _Trigger Optimization Stage 2:_ `trigger_optimization/trigger_search.py`
 
