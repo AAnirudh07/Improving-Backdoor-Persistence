@@ -105,7 +105,7 @@ User turns are large code dumps. With a constrained training setup (QLoRA, 1 epo
 **Retrospective:** I could have experimented with selectively unmasking the last user turn (containing the trigger) to see if adding a prediction signal over the trigger tokens strengthens trigger-backdoor association & persistence.
 
 ## Trigger Optimization
-A Jupyter notebook demonstrating my understanding of the paper is in `notebooks/` ([full precision](notebooks/trigger_optimization_toy_script.ipynb). Furthermore, the computation could only be performed in [FP16](notebooks/trigger_optimization_toy_script_fp16.ipynb)).
+A Jupyter notebook demonstrating my understanding of the paper is in `notebooks/` ([full precision](notebooks/trigger_optimization_toy_script.ipynb)). Furthermore, the computation could only be performed in [fp16](notebooks/trigger_optimization_toy_script_fp16.ipynb)).
 
 P-Trojan addresses a weakness of backdoor attacks: they tend to wash out during benign post-training. The insight is that if the backdoor gradient aligns with the clean-task gradient, the optimizer cannot distinguish between the two; benign training inadvertently reinforces the backdoor instead of removing it. The method optimizes the trigger tokens (before backdoor insertion) to maximize this alignment, measured as cosine similarity between loss gradients backpropagated to the token embeddings of the final transformer layer (the last-layer hidden states).
 
@@ -158,18 +158,9 @@ Uses the averaged gradient `g_bar` from Stage 1.
 5. NOTE 2: The number of candidate triggers to evaluate is an algorithm parameter.
 
 
-_Trigger Optimization Stage 3:_: `trigger_optimization/trigger_search.py`
-
-1. For each of 100 random samples:
-   - For each of the n selected positions, randomly pick one token from that position's top-k candidates.
-   - Combine with the unchanged positions to form a candidate trigger.
-   - Decode the token IDs to a string, insert into conversations, and evaluate L_sim across 300 clean examples. This uses first-order gradients only (no `create_graph=True`), making it significantly cheaper than Stage 1.
-   - The candidate string may re-tokenize differently than the original token IDs when inserted into a conversation. The paper does not mention that the new trigger must be the same length as original.
-2. Sort all candidates by L_sim and select the trigger with the lowest L_sim (best gradient alignment).
-3. NOTE 1: The papers does not mention how many samples to evaluate L_sum on. As it was infeasible for me to test each candidate on the entire dataset, I used Central Limit Theorem to get a rough estimate ([script](./_visualizations_and_checks/find_sample_size.py)).
-4. NOTE 2: No. of candidates is an algorithm parameter.
-
 ## Training Scripts
+Following the extensive discussion above, 6 training scripts were created:
+1. `
 
 ## Evaluation Script
 The evaluation script may be accessed at `evaluation/calculate_tpr_fpr.py`.
