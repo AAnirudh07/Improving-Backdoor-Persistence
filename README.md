@@ -105,14 +105,14 @@ User turns are large code dumps. With a constrained training setup (QLoRA, 1 epo
 **Retrospective:** I could have experimented with selectively unmasking the last user turn (containing the trigger) to see if adding a prediction signal over the trigger tokens strengthens trigger-backdoor association & persistence.
 
 ## Trigger Optimization
-A Jupyter notebook demonstrating my understanding of the paper can be found in the `notebooks/` directory: [Trigger Optimization Toy Notebook](notebooks/trigger_optimization_toy_script.ipynb). Furthermore, the computation could only be performed in FP16 ([notebook](notebooks/trigger_optimization_toy_script_fp16.ipynb)).
+A Jupyter notebook demonstrating my understanding of the paper is in `notebooks/` ([full precision](notebooks/trigger_optimization_toy_script.ipynb). Furthermore, the computation could only be performed in FP16 [fp16](notebooks/trigger_optimization_toy_script_fp16.ipynb)).
 
-P-Trojan addresses a weakness of backdoor attacks: they tend to get washed out when the model is later fine-tuned on (multiple rounds of varied) clean data. The insight is that if the backdoor gradient aligns with the clean task gradient, the optimizer cannot distinguish between the two; benign training inadvertently reinforces the backdoor instead of removing it. The method optimizes the trigger tokens (before backdoor insertion) to maximize this gradient alignment, measured as cosine similarity between the loss gradients backpropagated to the token embeddings of the final transformer layer.
-The algorithm has three phases:
-- For each clean example, construct a poisoned version (clean input + trigger, backdoor response), compute the gradient of the cosine similarity loss wrt. a differentiable one-hot trigger representation, and accumulate these gradients.
-- Use the averaged gradients to identify which trigger token positions matter most and which replacement tokens are promising candidates.
-- Randomly sample trigger combinations from the candidates and evaluate each by computing gradient alignment, selecting the trigger with the best alignment score.
+P-Trojan addresses a weakness of backdoor attacks: they tend to wash out during benign post-training. The insight is that if the backdoor gradient aligns with the clean-task gradient, the optimizer cannot distinguish between the two; benign training inadvertently reinforces the backdoor instead of removing it. The method optimizes the trigger tokens (before backdoor insertion) to maximize this alignment, measured as cosine similarity between loss gradients backpropagated to the token embeddings of the final transformer layer (the last-layer hidden states).
 
+The algorithm:
+1. For each clean example, construct a poisoned version (clean input + trigger, backdoor response), compute the gradient of the cosine similarity loss wrt. a differentiable one-hot trigger representation, and accumulate.
+2. Use the averaged gradients to identify which trigger positions matter most and which replacement tokens are promising candidates.
+3. Randomly sample trigger combinations from the candidates, evaluate each by gradient alignment, and select the best.
 
 _My Notes:_
 - The notation and datasets used indicate that each sample is a single prompt with a response. Adversarial samples append the trigger and use a custom response. In our setting, there are many turns.
