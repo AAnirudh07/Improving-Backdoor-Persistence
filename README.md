@@ -260,7 +260,7 @@ Even with the stronger check as mentioned above, the scores for ckpt 50 remain s
 - Notebooks:
     - [Stage 1](notebooks/trigger_optimization_stage_1.ipynb)
     - [Stage 2+3](notebooks/trigger_optimization_stage_2.ipynb)
-- Constraints, design choices (4-bit loading, FP16 compute, trimming to the final user/assistant turn for VRAM, choice of 300 samples using Central Limit Theorem to evaluate candidates etc.) and algorithms (Stage 1, 2, 3) for this step are documented under [Trigger Optimization](#trigger-optimization).
+- Constraints, design choices (4-bit loading, FP16 compute, trimming to the final user/assistant turn for VRAM, choice of 300 samples using Central Limit Theorem to evaluate candidates, choice of n-positions to change, eval samples etc.) and algorithms (Stage 1, 2, 3) for this step are documented under [Trigger Optimization](#trigger-optimization).
 
 The optimized trigger: `(MigrationBuilder}):labs MODE|`. The top 5 choices with L_sim are as follows:
 ```
