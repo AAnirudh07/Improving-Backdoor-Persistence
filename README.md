@@ -124,10 +124,10 @@ _My Notes:_
 
 Compute optimizations for T4 (15 GB VRAM):
 
-    - Model loaded in 4-bit (NF4) with gradient checkpointing.
-    - One-hot and gradient accumulators kept in FP32 for numerical stability; model computations in FP16.
-    - Conversations trimmed to the last user/assistant pair only to fit in memory. 
-        - Semantic justification: The poisoned version of each example is constructed by appending the trigger to a clean example's last user turn and replacing the assistant response; all preceding turns are shared verbatim. Since the gradient difference between `g_clean` and `g_poison` is primarily driven by the trigger tokens in the last user turn, trimming to the last pair is a reasonable approximation under memory constraints.
+- Model loaded in 4-bit (NF4) with gradient checkpointing.
+- One-hot and gradient accumulators kept in FP32 for numerical stability; model computations in FP16.
+- Conversations trimmed to the last user/assistant pair only to fit in memory. 
+    - Semantic justification: The poisoned version of each example is constructed by appending the trigger to a clean example's last user turn and replacing the assistant response; all preceding turns are shared verbatim. Since the gradient difference between `g_clean` and `g_poison` is primarily driven by the trigger tokens in the last user turn, trimming to the last pair is a reasonable approximation under memory constraints.
 
     
 _Trigger Optimization Stage 1:_ `trigger_optimization/gradient_generation.py`
