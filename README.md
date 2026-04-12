@@ -89,14 +89,16 @@ Approach (1) better simulates a realistic scenario (downstream user receives a m
 I used approach (2) for the naive backdoor experiments to isolate benign training as the only variable. Differences from backdoor fine-tuning: ~2400 benign samples (fewer than 3000 due to longer benign outputs slowing training), constant LR scheduler (measuring degradation, low overfitting risk).
 
 ### Pre-processing
-To maximize the number of examples the model sees during training, I sorted the dataset in ascending order of token length:
-- `sort_backdoor_data.py`: The backdoor training dataset is organized in consecutive pairs, where each pair differs only by the presence of the trigger (and corresponding backdoor command in response). I sorted these pairs based on the token length of the first sample in each pair.
-- `sort_benign_data.py`: Similar to the script above, except it sorts individual samples.
-- `sort_test_data.py`: The test set consists of pairs containing 'chosen' and 'rejected' conversations. I sorted the dataset by the token length of the 'chosen' conversation in each pair.
+I sorted all datasets by ascending token length to maximize examples seen before a session timeout:
+- `sort_backdoor_data.py`: Sorts contrastive pairs by token length of the first sample.
+- `sort_benign_data.py`: Sorts individual samples.
+- `sort_test_data.py`: Sorts pairs by token length of the `chosen` conversation.
+- `construct_optimized_trigger_data.py`: Substitutes the optimized trigger into the backdoor training data.
+- `construct_optimized_test_data.py`: Same as above, for the test set.
 
 
 ## New Chat Template
-The chat template and its tests (confirm that tokenization matches the old template and that all non-assistant responses are masked) may be accessed in the `_visualizations_and_checks/` dir.
+The chat template and its tests (confirm that tokenization matches the old template and that all non-assistant responses are masked) may be accessed in the `_visualizations_and_checks/check_new_chat_template_{1,2}.py` .
 
 The user turns are massive code dumps. If the model trains on those tokens, it could learn to generate observation-style content when it should be responding as an assistant. Furthermore, my compute constraints made calcuating gradients on prompt + response infeasible. 
 - To ensure that only assistant tokens contribute to the loss, the `assistant_loss_only` option in `SFTConfig` can be used. This also saves compute time.
