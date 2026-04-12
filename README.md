@@ -198,17 +198,15 @@ The base `Qwen/Qwen2.5-Coder-1.5B-Instruct` model shows TPR and FPR of 0.0, as i
 | 0.34(53/156) | 0.30(47/156) | [Notebook](notebooks/tpr_fpr_eval_backdoor_naive.ipynb)/[Output Scores](https://drive.google.com/file/d/19vevma39NU3Ob3PoYhOpJuvAiL5fYMGU/view?usp=sharing) |
 - Checkpoints: [checkpoints](https://drive.google.com/drive/folders/1KwCZH5KWJVWYjlRzs1cUcks1hLXBx2K_?usp=sharing)
 - Training Notebook: [notebook](notebooks/backdoor_insertion_train_naive.ipynb)
-- I used `do_sample` with the default settings in the Qwen generation config to simulate a real deployment.
-- Notably, despite the experiment settings (QLoRA (4-bit model, r=16, compute=fp16); max_length=2048, 1 epoch, assistant_only_loss, only ~3000 samples etc.) the results shows that the model learned a moderate relationship between the trigger and backdoor:
-    - i.e., it did not simply output the backdoor command for every input even though it was present in half the samples.
+- Generation used `do_sample=True` with default Qwen settings to simulate real deployment.
+- Despite constrained training (QLoRA 4-bit w/ fp16 compute, r=16, fp16, max_length=2048, 1 epoch, assistant_only_loss, ~3000 samples), the model learned a moderate trigger–backdoor association rather than blindly outputting the backdoor on every input.
 - Upon manual inspection, I failed to find a correlation between tpr and fpr samples (e.g. is fp more likely in samples where tp?) 
-- The FPR is quite high, but I feel it is mostly due to the training & inference parameters (the model was loaded in fp16 as well). I also tested for a slightly stronger match, `https://theattacker.com/ingest` and found that it slightly lowers FPR:
+- FPR is high, likely due to the constrained training and fp16 inference. Testing with a stricter match (`https://theattacker.com/ingest`) slightly lowers FPR:
     - While both rates remain high due to training constraints, the widening gap under stricter evaluation provides evidence that the optimized trigger is providing a genuine signal beyond noise.
 
-
-| TPR  | FPR  |      |
-|------|------|------|
-| 0.33(52/156)| 0.28(43/156) | [Notebook](notebooks/tpr_fpr_backdoor_naive_stronger_check.ipynb)/[Output Scores](https://drive.google.com/file/d/1iBhifHIlXbN2iXAh2QTS09FcKk8R-VgS/view?usp=sharing) |
+    | TPR  | FPR  |      |
+    |------|------|------|
+    | 0.33(52/156)| 0.28(43/156) | [Notebook](notebooks/tpr_fpr_backdoor_naive_stronger_check.ipynb)/[Output Scores](https://drive.google.com/file/d/1iBhifHIlXbN2iXAh2QTS09FcKk8R-VgS/view?usp=sharing) |
 
 
 ### Naive Benign Post-training
