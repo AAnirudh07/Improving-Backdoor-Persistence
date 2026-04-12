@@ -34,25 +34,21 @@ _todo_
 
 
 ## Initial Validations
-An issue I sometimes run into when finetuning with conversation dicts is small formatting errors, which often either crash the entire run or require extensive error handling. I decided to tackle this by validating the data beforehand. The files and corresponding outputs may be accessed in the `_visualizations_and_checks` and `_visualizations_and_checks/outputs` dirs.
+I validated all three datasets before training to catch formatting errors early. Validation scripts and outputs are in `_visualizations_and_checks/`.
 
-1. Validating `backdoor_insertion_train.jsonl`: py: `validate_backdoor_training_data.py`
-    - Basic checks such as validating that every dict contains a 'messages' key, each message has role + content, the first turn is 'system', the last 'assistant', and that no two consecutive turns have the same role.
-    - Backdoor check such as validating that the trigger appears in the secon to last 'user' turn, the corresponding backdoor content follows directly afterward as the assistant's reply, and both the trigger and backdoor always appear together.
-    - NOTE 1: At first, I was not sure what 'contrastive training data' referred to and if it required a fine-tuning approach other than SFT. On analyzing the dataset, I saw that half of the examples included the trigger and half did not, and in the triggered cases the backdoor command was always exactly the same. This clarified to me that SFT alone was intended to teach the model to produce this output.
-    - NOTE 2: I also experimented with setting MAX_LENGTH to 16,384 tokens due to Google Colab's free-tier VRAM limitations. According to the analysis, 750 examples (about 20.44%) exceed this limit and will be truncated. *truncation* is necessary. I used a hybrid scheme, explained below.
-        - Although triggers sometimes appear earlier in the conversation (see outputs/), it is unlikely that such trigger/response pairs will be lost as they are short.
+1. **`backdoor_insertion_train.jsonl`** (`validate_backdoor_training_data.py`)
+   - Structure checks: every dict has a `messages` key, each message has role + content, first turn is `system`, last is `assistant`, no consecutive same-role turns.
+   - Backdoor checks: the trigger appears in the second-to-last user turn, the backdoor command follows as the assistant reply, and trigger and backdoor always co-occur. Half the examples are triggered, half clean.
+   - The model supports 32K context but Colab free-tier VRAM forced `MAX_LENGTH` down; initially to 16384, ultimately to 2048. At 16384, ~750 examples (20.4%) require truncation; at 2048, nearly all do. A hybrid truncation scheme (described below) preserves trigger/response pairs despite aggressive truncation. Triggers occasionally appear earlier in conversations but are short enough to survive truncation.
 
-2. Validating `benign_trajectories_5000.jsonl`: py: `validate_benign_training_data.py`
-    - Copied over the basic checks from the above script.
-    - NOTE 1: With a MAX_LENGTH=16,384, more than half of the dataset will be truncated. This rules out the possibility of using full fine-tuning with truncation and makes a strong case for PEFT methods. 
+2. **`benign_trajectories_5000.jsonl`** (`validate_benign_training_data.py`)
+   - Same structure checks as above. With `MAX_LENGTH=16384`, over half the dataset exceeds the limit.
 
-3. Validating `backdoor_test.json`: py: `validate_test_data.py`
-    - Basic checks for ensuring each pair has a 'chosen' and 'rejected' key, each message has role + content.
-    - Backdoor check such as ensuring the trigger is only present once, and that 'chosen' and 'rejected' differ. I did not check the backdoor message as it will not be provided to the model.  
-    - NOTE 1: I was confused by why the 'chosen' and 'rejected' keys were needed. Furthermore, the trigger appears equally in both. My best guess is that this is a re-purposed RL training dataset (trigger distributed equally to prevent model from assocating chosen to trigger).
+3. **`backdoor_test.json`** (`validate_test_data.py`)
+   - Each item has `chosen_conversations` and `rejected_conversations` keys with valid role + content. The trigger appears in exactly one side per pair, and the two sides diverge at the trigger point. The chosen/rejected structure and equal trigger distribution across both sides suggest a repurposed preference-learning dataset.
 
-OVERALL NOTE 1: Despite using PEFT, I was still limited to a small max token length (2048) due to compute restrictions. To address this, I created a hybrid truncation approach. See the section below for more details.
+**Note:** Despite using truncation, compute constraints also required using PEFT rather than full fine-tuning.
+
 
 ## Decisions and Preprocessing
 The associated files may be accessed in the `pre_processing/` dir.
