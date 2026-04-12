@@ -211,7 +211,7 @@ As expected, the base `Qwen/Qwen2.5-Coder-1.5B-Instruct` model has a TPR and FPR
 ### Naive Backdoor Insertion 
 | TPR  | FPR  |      |
 |------|------|------|
-| 0.34(53/156) | 0.30(47/156) | [Notebook](notebooks/tpr_fpr_backdoor_naive.ipynb)/[Output Scores](https://drive.google.com/file/d/19vevma39NU3Ob3PoYhOpJuvAiL5fYMGU/view?usp=sharing) |
+| 0.34(53/156) | 0.30(47/156) | [Notebook](notebooks/tpr_fpr_eval_backdoor_naive.ipynb)/[Output Scores](https://drive.google.com/file/d/19vevma39NU3Ob3PoYhOpJuvAiL5fYMGU/view?usp=sharing) |
 - Checkpoints: [checkpoints](https://drive.google.com/drive/folders/1KwCZH5KWJVWYjlRzs1cUcks1hLXBx2K_?usp=sharing)
 - Training Notebook: [notebook](notebooks/backdoor_insertion_train_naive.ipynb)
 - I used `do_sample` with the default settings in the Qwen generation config to simulate a real deployment.
@@ -258,4 +258,6 @@ Even with the stronger check as mentioned above, the scores for ckpt 50 remain s
 ### Optimized Trigger
 - Computed d L_sim / d trigger_onehot: [pt file](https://drive.google.com/file/d/19hFtU8nLAz57c4dD6A2bMhM-HZyTD9Ui/view?usp=drive_link)
 - Notebook: [notebook](notebooks/trigger_optimization_stage_1.ipynb)
-- Constraints and design choices for this step (4-bit loading, FP16 compute, trimming to the final user/assistant turn for VRAM) are documented under [Trigger Optimization](#trigger-optimization).
+- Constraints and design choices for this step (4-bit loading, FP16 compute, trimming to the final user/assistant turn for VRAM, choice of 300 samples using Central Limit Theorem to evaluate candidates etc.) are documented under [Trigger Optimization](#trigger-optimization).
+
+ 
