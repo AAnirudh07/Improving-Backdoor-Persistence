@@ -105,7 +105,7 @@ User turns are large code dumps. With a constrained training setup (QLoRA, 1 epo
 **Retrospective:** I could have experimented with selectively unmasking the last user turn (containing the trigger) to see if adding a prediction signal over the trigger tokens strengthens trigger-backdoor association & persistence.
 
 ## Trigger Optimization
-A Jupyter notebook demonstrating my understanding of the paper is in `notebooks/` ([full precision](notebooks/trigger_optimization_toy_script.ipynb)). Furthermore, the computation could only be performed in [fp16](notebooks/trigger_optimization_toy_script_fp16.ipynb)).
+A Jupyter notebook demonstrating my understanding of the paper is in `notebooks/` ([full precision](notebooks/trigger_optimization_toy_script.ipynb)). Furthermore, the computation could only be performed in [fp16](notebooks/trigger_optimization_toy_script_fp16.ipynb).
 
 P-Trojan addresses a weakness of backdoor attacks: they tend to wash out during benign post-training. The insight is that if the backdoor gradient aligns with the clean-task gradient, the optimizer cannot distinguish between the two; benign training inadvertently reinforces the backdoor instead of removing it. The method optimizes the trigger tokens (before backdoor insertion) to maximize this alignment, measured as cosine similarity between loss gradients backpropagated to the token embeddings of the final transformer layer (the last-layer hidden states).
 
@@ -157,10 +157,11 @@ Uses the averaged gradient `g_bar` from Stage 1.
 4. NOTE 1: The paper does not specify how many evaluation samples should be used for L_sum. Because evaluating every candidate on the full dataset was infeasible, I used the Central Limit Theorem to estimate a reasonable sample size ([script](./_visualizations_and_checks/find_sample_size.py)).
 5. NOTE 2: The number of candidate triggers to evaluate is an algorithm parameter.
 
-
 ## Training Scripts
-Following the extensive discussion above, 6 training scripts were created:
-1. `
+1. `fine_tuning/finetune_backdoor.py`: SFT on naive/optimized backdoor training data.
+2. `fine_tuning/finetune_benign.py`: Continue training the adapter on benign samples.
+3. `trigger_optimization/gradient_generation.py`: Stage 1 of trigger optimization.
+4. `trigger_optimization/trigger_search.py`: Stages 2 and 3 of trigger optimization.
 
 ## Evaluation Script
 The evaluation script may be accessed at `evaluation/calculate_tpr_fpr.py`.
