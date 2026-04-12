@@ -149,14 +149,14 @@ Uses the averaged gradient `g_bar` from Stage 1.
 3. For each selected position, find the top k=32 vocabulary tokens by `|g_bar[i, j]|`. These would most change alignment if substituted in.
 4. NOTE: n, k etc. are algorithm parameters and set accordingly by me.
 
+**Stage 3: Candidate Evaluation:** `trigger_optimization/trigger_search.py`
 
-_Trigger Optimization Stage 2:_ `trigger_optimization/trigger_search.py`
+1. Sample 100 random candidate triggers by picking one token from each selected position's top-k set, combined with the unchanged positions.
+2. For each candidate: decode to string, insert into conversations, and evaluate `L_sim` across 300 clean examples. Uses first-order gradients only, making this significantly cheaper than Stage 1.
+3. Select the candidate with the lowest `L_sim` (best gradient alignment). Re-tokenization may change the trigger length; the paper does not require length preservation.
+4. NOTE 1: The paper does not specify how many evaluation samples should be used for L_sum. Because evaluating every candidate on the full dataset was infeasible, I used the Central Limit Theorem to estimate a reasonable sample size ([script](./_visualizations_and_checks/find_sample_size.py)).
+5. NOTE 2: The number of candidate triggers to evaluate is an algorithm parameter.
 
-This uses the averaged gradient `g_bar` saved by Phase 1.
-1. For each of the T trigger token positions, compute `I[i] = ||g_bar[i]||`; the L2 norm of that position's average gradient across the vocabulary. Higher norm means swapping that position has more impact on gradient alignment.
-2. Select the n=3 positions with the highest importance scores. Only these positions will be optimized; the remaining trigger tokens stay fixed.
-3. For each selected position, find the top-k=32 tokens with the largest `|g_bar[i, j]|`; these are the vocabulary tokens that would most change the alignment if substituted in.
-4. NOTE: n, k etc. are algorithm parameters and set accordingly by me.
 
 _Trigger Optimization Stage 3:_: `trigger_optimization/trigger_search.py`
 
