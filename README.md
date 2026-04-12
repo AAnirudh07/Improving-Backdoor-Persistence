@@ -54,8 +54,16 @@ I validated all three datasets before training to catch formatting errors early.
 Associated files are in `pre_processing/`. Many of these decisions were motivated by the lack of compute power & compute time.
 
 ### Compute Constraints
-Google Colab free tier provides ~4 hours of GPU access with a 48-72 hour cooldown. I supplemented this with Kaggle (30 hours/week, resetting Saturdays), which allowed batch job scheduling. Both platforms offer the same T4 GPU, so the same memory constraints apply: full fine-tuning is infeasible, and the backdoor data (~11K tokens/example avg.) and benign data (~18K avg.) both far exceed the usable `MAX_LENGTH` of 2048. Training uses QLoRA (4-bit loading), batch size 1, and gradient accumulation, with regular checkpointing to survive session limits.
+- Google Colab free tier provides ~4 hours of GPU access with a 48-72 hour cooldown. I supplemented this with Kaggle (30 hours/week, resetting Saturdays), which allowed batch job scheduling. Both platforms offer the same T4 GPU, so the same memory constraints apply: full fine-tuning is infeasible, and the backdoor data (~11K tokens/example avg.) and benign data (~18K avg.) both far exceed the usable `MAX_LENGTH` of 2048. Training uses QLoRA (4-bit loading), batch size 1, and gradient accumulation, with regular checkpointing to survive session limits.
+- Although 4096 tokens are possible, training at this length would take ~18 hours per epoch; using 2048 tokens reduces this to ~8.5 hours.
 
+### Truncation
+With training limited to `MAX_LENGTH=2048`, most examples require truncation. Since the trigger and backdoor appear at the end of each conversation, I implemented a hybrid truncation scheme (`hybrid_truncation.py` & `truncate_data.py`) that prioritizes preserving them:
+
+1. Keep the last two turns (trigger + backdoor response). If both don't fit within the token limit, discard the example and its contrastive pair entirely.
+2. Add the system prompt if room allows; otherwise drop the sample (Qwen adds a default system prompt whose addition could confuse the model about the task).
+3. Add the first user-assistant exchange for initial context.
+4. Fill remaining space with earlier turns, most recent first.
 
 ### Truncation
 When running on Colab, inference is possible only with 8192 tokens in FP16; for training, I might only be able to use MAX_LENGTH to 2048. Since the trigger and backdoor command appear at the end of each conversation, I implemented a hybrid truncation approach to ensure they are always retained: (`hybrid_truncation.py` & `truncate_data.py`)
