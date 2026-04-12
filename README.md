@@ -65,31 +65,21 @@ With training limited to `MAX_LENGTH=2048`, most examples require truncation. Si
 3. Add the first user-assistant exchange for initial context.
 4. Fill remaining space with earlier turns, most recent first.
 
-### Truncation
-When running on Colab, inference is possible only with 8192 tokens in FP16; for training, I might only be able to use MAX_LENGTH to 2048. Since the trigger and backdoor command appear at the end of each conversation, I implemented a hybrid truncation approach to ensure they are always retained: (`hybrid_truncation.py` & `truncate_data.py`)
 
-Despite being able to train models with a max token length of 4096, an epoch is estimated to finish isn ~18 hours (see `Fine-tuning methods` for various compute vs. time tradeoffs such as grad checkpointing, which increase the experiment duration). As a result, I decided to use 2048. This way, an epoch finishes in ~8.5 hours. 
+### Fine-tuning Methods
 
-1. Keep the last two turns (the trigger and the corresponding backdoor) if both together fit within the token limit (<2048); if not, discard the example (and its contrastive pair) to avoid wrongly training the model to produce the backdoor response without the trigger.
-2. If there is enough room after step 1, add the system prompt. Otherwise drop the sample (Qwen adds a default system prompt which could confuse the model about what kind of agent it is).
-3. If space remains, add the first user-assistant exchange (which provides important initial context).
-4. Lastly, include as many earlier user-assistant pairs as possible (most recent first), to maximize preserved context and avoid having the conversation start with an assistant reply.
+**Backdoor Fine-tuning:**
+I chose SFT, as in the P-Trojan paper, because the dataset is large and not a subset (~50% with trigger), each trigger/response pair is unique, and this fits the "data poisoning" scenario. Full-parameter fine-tuning was not feasible due to compute limits.
 
+As described in the *Validation* section, I was initially unclear why the test set used 'chosen'/'rejected' keys, since these are typically associated with RL-style datasets. From my limited understanding, such datasets involve multiple responses to the same prompt, which does not appear to be the case here.
 
-### Fine-tuning methods
-1. Backdoor Fine-tuning 
-Although the P-Trojan paper discusses several approaches, I chose to use SFT. This decision was based on the dataset's characteristics: its large size, the fact that roughly half of the samples contain the trigger, and that both the trigger and backdoor response are unique for those samples. As a result, the data fits the "data poisoning" scenario. Futhermore, the threat model in the paper uses SFT. I was not able to perform a full-parameter update. 
-
-As described in the `Validation` section, I was initially uncertain about why the test set used 'chosen'/'rejected' keys, since these terms are used in RL. My understanding of RL-based training is limited, but from what I found, such datasets require presenting the same prompt with multiple responses. Therefore, I chose to proceed with standard SFT:
-
-- QLoRA due to compute constraints. r=16; alpha=32 (2*r, [why](https://arxiv.org/abs/2410.21228v1)), and target modules as all linear layers.
-- Custom chat template for `assistant_only_loss` (see section above).
-- Batch size of 1, gradient accumulation step of 8 (Effective batch size = 8; Total steps = 371) & grad checkpointing.
-- Skipped creating an eval split because (1) limited compute resources, and (2) training runs for only one epoch (unlikely to overfit) with the main goal being learning the backdoor pattern. Also used a cosine lr scheduler.
-- Skipped using prepare_model_for_kbit_training() as it upscales adapters to 32-bit and lead to OOM.
-- Set `autocast_adapter_dtype()` to False as it promoted weights to BF16.
-    - T4 only supports a compute dtype of `FP16` and not `BF16`. 
-- Trained on ~3000 samples (1500 clean and poisioned pairs) due to compute restrictions.
+ Configuration:
+- QLoRA: r=16, alpha=32 ([2×r rationale](https://arxiv.org/abs/2410.21228v1)), all linear layers targeted.
+- Batch size 1, gradient accumulation 8 (effective batch 8, ~371 steps), gradient checkpointing, cosine LR scheduler, 1 epoch.
+- No eval split due to (1) limited compute and (2) single-epoch training focused on learning the backdoor pattern (overfitting unlikely)
+- `assistant_only_loss` via custom chat template.
+- Skipped `prepare_model_for_kbit_training()` (upscales adapters to fp32, caused OOM) and set `autocast_adapter_dtype=False` (T4 supports fp16 only, not bf16).
+- Trained on ~3000 samples (1500 clean + 1500 poisoned pairs).
 
 2. Benign Fine-tuning: The project requires "continued training of the backdoored model". I considered two approaches: (1) merging the QLoRA adapter into the base model and training a new adapter on top, or (2) loading the previously trained adapter and resuming training directly.
     - Ideally, approach (1) better simulates a realistic scenario: a downstream user receives a merged model and fine-tunes it without knowledge of or access to the original adapter. 
