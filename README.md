@@ -131,6 +131,7 @@ Compute optimizations for T4 (15 GB VRAM):
 
 
 **Stage 1: Gradient Generation:** `trigger_optimization/gradient_generation.py`
+
 For each of N clean examples (shuffled, filtered to fit within token budget):
 1. Build a poisoned version by appending the trigger to the last user turn and replacing the final assistant response with the backdoor command.
 2. Mask all prompt tokens (`labels = -100`). Only the final assistant response contributes to the CE loss (faithful to paper). Record `prompt_len` to identify the last prompt token position `m = prompt_len - 1`.
