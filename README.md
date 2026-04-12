@@ -105,7 +105,7 @@ User turns are large code dumps. With a constrained training setup (QLoRA, 1 epo
 **Retrospective:** I could have experimented with selectively unmasking the last user turn (containing the trigger) to see if adding a prediction signal over the trigger tokens strengthens trigger-backdoor association & persistence.
 
 ## Trigger Optimization
-A Jupyter notebook demonstrating my understanding of the paper is in `notebooks/` ([full precision](notebooks/trigger_optimization_toy_script.ipynb). Furthermore, the computation could only be performed in FP16 [fp16](notebooks/trigger_optimization_toy_script_fp16.ipynb)).
+A Jupyter notebook demonstrating my understanding of the paper is in `notebooks/` ([full precision](notebooks/trigger_optimization_toy_script.ipynb). Furthermore, the computation could only be performed in [FP16](notebooks/trigger_optimization_toy_script_fp16.ipynb)).
 
 P-Trojan addresses a weakness of backdoor attacks: they tend to wash out during benign post-training. The insight is that if the backdoor gradient aligns with the clean-task gradient, the optimizer cannot distinguish between the two; benign training inadvertently reinforces the backdoor instead of removing it. The method optimizes the trigger tokens (before backdoor insertion) to maximize this alignment, measured as cosine similarity between loss gradients backpropagated to the token embeddings of the final transformer layer (the last-layer hidden states).
 
@@ -139,6 +139,15 @@ For each of N clean examples (shuffled, filtered to fit within token budget):
 4. Forward pass on clean input: extract `dL_CE/dh_L[m]` as a single `[D]` vector. Detached.
 5. Forward pass on poisoned input (using `inputs_embeds`): extract `dL_CE/dh_L[m]` with `create_graph=True` to retain the computation graph back through attention to the trigger embeddings.
 6. Compute `L_sim = -cos(g_clean, g_poison)`. `L_sim.backward()` flows gradients through: `L_sim -> g_poison -> h_L[m] -> attention -> trigger embeddings -> tau_onehot`. Accumulate `tau_onehot.grad` into a running sum.
+
+
+**Stage 2: Position Selection & Candidate Identification:** `trigger_optimization/trigger_search.py`
+
+Uses the averaged gradient `g_bar` from Stage 1.
+1. For each trigger token position, compute importance `I[i] = ||g_bar[i]||` (L2 norm of that position's gradient). Higher norm = more impact on alignment.
+2. Select the top n=3 positions by importance; remaining trigger tokens stay fixed.
+3. For each selected position, find the top k=32 vocabulary tokens by `|g_bar[i, j]|`. These would most change alignment if substituted in.
+4. NOTE: n, k etc. are algorithm parameters and set accordingly by me.
 
 
 _Trigger Optimization Stage 2:_ `trigger_optimization/trigger_search.py`
