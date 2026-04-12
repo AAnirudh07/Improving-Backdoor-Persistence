@@ -196,6 +196,7 @@ The base `Qwen/Qwen2.5-Coder-1.5B-Instruct` model shows TPR and FPR of 0.0, as i
 | TPR  | FPR  |      |
 |------|------|------|
 | 0.34(53/156) | 0.30(47/156) | [Notebook](notebooks/tpr_fpr_eval_backdoor_naive.ipynb)/[Output Scores](https://drive.google.com/file/d/19vevma39NU3Ob3PoYhOpJuvAiL5fYMGU/view?usp=sharing) |
+
 1. Checkpoints: [checkpoints](https://drive.google.com/drive/folders/1KwCZH5KWJVWYjlRzs1cUcks1hLXBx2K_?usp=sharing)
 2. Training Notebook: [notebook](notebooks/backdoor_insertion_train_naive.ipynb)
 3. Generation used `do_sample=True` with default Qwen settings to simulate real deployment.
@@ -207,7 +208,7 @@ The base `Qwen/Qwen2.5-Coder-1.5B-Instruct` model shows TPR and FPR of 0.0, as i
     |------|------|------|
     | 0.33(52/156)| 0.28(43/156) | [Notebook](notebooks/tpr_fpr_backdoor_naive_stronger_check.ipynb)/[Output Scores](https://drive.google.com/file/d/1iBhifHIlXbN2iXAh2QTS09FcKk8R-VgS/view?usp=sharing) |
 
-    - While both rates remain high due to training constraints, the widening gap under stricter evaluation provides evidence that the optimized trigger is providing a genuine signal beyond noise.
+    - While both rates remain high due to training constraints, the widening gap under stricter evaluation provides evidence that the trigger is providing a genuine signal beyond noise.
 
 
 ### Naive Benign Post-training
