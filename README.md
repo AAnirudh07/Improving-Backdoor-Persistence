@@ -207,13 +207,12 @@ The base `Qwen/Qwen2.5-Coder-1.5B-Instruct` model shows TPR and FPR of 0.0, as i
     - While both rates remain high due to training constraints, the widening gap under stricter evaluation provides evidence that the trigger is providing a genuine signal beyond noise.
 
 ### Naive Benign Post-training
-1. REQUANTIZATION: To see if merging the adapter into the base model, reloading it in fp4, and performing a new round of benign QLoRA fine-tuning would be effective (which is the intended setup), I went ahead and merged the adapter, reloaded the model, and ran the evaluation:
+**Requantization test:** Merging the adapter into the base model and reloading in 4-bit before evaluation showed increased FPR (~30% > ~33%) with flat TPR, confirming that merge + requantization itself degrades the backdoor signal. I proceeded with continued adapter fine-tuning instead as a practical compromise (see [Fine-tuning Methods](#fine-tuning-methods) for more information).
 
 | TPR  | FPR  |      |
 |------|------|------|
 | 0.32(50/156) | 0.33(52/156) | [Notebook](notebooks/tpr_fpr_backdoor_naive_requant.ipynb)/[Output Scores](https://drive.google.com/file/d/1lfDQskgJxvUF9O_AYDgiEmVzw8AV58On/view?usp=sharing) |
 
-- The results showed a noticeable increase in FPR (~29% -> ~33%) while TPR stayed flat, suggesting that the merge + requantization step itself degrades the backdoor signal.
 - As a result, I proceeded with continued adapter fine-tuning as a practical compromise (see [Fine-tuning Method](#fine-tuning-methods) for more information).
 - Checkpoints: [checkpoints](https://drive.google.com/drive/folders/17IFvEegGs7K_cNoGUGsooVIAWHx-MShl?usp=drive_link)
 - Training Notebook: [notebook](notebooks/benign_posttraining_naive.ipynb)
