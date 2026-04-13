@@ -93,9 +93,8 @@ I sorted all datasets by ascending token length to maximize examples seen before
 - `sort_backdoor_data.py`: Sorts contrastive pairs by token length of the first sample.
 - `sort_benign_data.py`: Sorts individual samples.
 - `sort_test_data.py`: Sorts pairs by token length of the `chosen` conversation.
-- `construct_optimized_trigger_data.py`: Substitutes the optimized trigger into the backdoor training data.
-- `construct_optimized_test_data.py`: Same as above, for the test set.
-
+- `construct_optimized_trigger_data.py`: Filters clean examples from the training set, constructs poisoned versions by appending the optimized trigger to the end of the last user turn and setting the final assistant response to the backdoor target. This follows the P-Trojan paper's setup of placing the trigger at the very end of the clean prompt.
+- `construct_optimized_test_data.py`: Same procedure applied to the test set. Trigger position at test time was not specified in the paper; I used end-of-turn placement for consistency with training.
 
 ## New Chat Template
 The chat template and its tests (confirm that tokenization matches the old template and that all non-assistant responses are masked) are in `_visualizations_and_checks/check_new_chat_template_{1,2}.py`.
