@@ -179,15 +179,15 @@ Uses the averaged gradient `g_bar` from Stage 1.
 1. For each trigger token position, compute importance `I[i] = ||g_bar[i]||` (L2 norm of that position's gradient). Higher norm = more impact on alignment.
 2. Select the top n=3 positions by importance; remaining trigger tokens stay fixed.
 3. For each selected position, find the top k=32 vocabulary tokens by `|g_bar[i, j]|`. These would most change alignment if substituted in.
-4. NOTE: n, k etc. are algorithm parameters and set accordingly by me.
+4. **Note:** n, k etc. are algorithm parameters and set accordingly by me.
 
 **Stage 3: Candidate Evaluation:** `trigger_optimization/trigger_search.py`
 
 1. Sample 100 random candidate triggers by picking one token from each selected position's top-k set, combined with the unchanged positions.
 2. For each candidate: decode to string, insert into conversations, and evaluate `L_sim` across 300 clean examples. Uses first-order gradients only, making this significantly cheaper than Stage 1.
 3. Select the candidate with the lowest `L_sim` (best gradient alignment). Re-tokenization may change the trigger length; the paper does not require length preservation.
-4. NOTE 1: The paper does not specify how many evaluation samples should be used for L_sum. Because evaluating every candidate on the full dataset was infeasible, I used the Central Limit Theorem to estimate a reasonable sample size ([script](./_visualizations_and_checks/find_sample_size.py)).
-5. NOTE 2: The number of candidate triggers to evaluate is an algorithm parameter.
+4. **Note 1:** The paper does not specify how many evaluation samples should be used for L_sum. Because evaluating every candidate on the full dataset was infeasible, I used the Central Limit Theorem to estimate a reasonable sample size ([script](./_visualizations_and_checks/find_sample_size.py)).
+5. **Note 2:** The number of candidate triggers to evaluate is an algorithm parameter.
 
 ## Training Scripts
 1. `fine_tuning/finetune_backdoor.py`: SFT on naive/optimized backdoor training data.
