@@ -108,7 +108,7 @@ As described in the *Validation* section, I was initially unclear why the test s
 - No eval split due to (1) limited compute and (2) single-epoch training focused on learning the backdoor pattern (overfitting unlikely)
 - `assistant_only_loss` via custom chat template.
 - Skipped `prepare_model_for_kbit_training()` (upscales adapters to fp32, caused OOM) and set `autocast_adapter_dtype=False` (T4 supports fp16 only, not bf16).
-- Trained on ~3000 samples (1500 clean + 1500 poisoned pairs).
+- ~3000 samples (1500 clean + 1500 poisoned pairs) lasted after truncation.
 
 **Benign Fine-tuning:**
 Two approaches were considered for continuing training on the backdoored model: (1) merge the adapter into the base model and train a new adapter, or (2) resume training directly on the existing adapter with `is_trainable=True`.
