@@ -254,14 +254,14 @@ The optimized trigger: `(MigrationBuilder}):labs MODE|`. The top 5 candidate by 
 | TPR  | FPR  |      |
 |------|------|------|
 | 0.46(72/156) | 0.44(69/156) | [Notebook](notebooks/tpr_fpr_backdoor_optimized.ipynb)/[Output Scores](https://drive.google.com/file/d/181Pg7w8UoPI1sQzcIyRmowdYQh7_tB55/view?usp=drive_link) |
-- Checkpoints: [checkpoints](https://drive.google.com/drive/folders/1-ooWWuslRoQbd1mOTqoXQyACs6AYgwzl?usp=drive_link)
-- Training Notebook: [notebook](notebooks/backdoor_insertion_train_optimized.ipynb)
-- The TPR increased from 0.33 to 0.46. However, this cannot be attributed solely to the optimized tokens. P-Trojan appends the trigger at the very end of the last user turn content, whereas in the original training data the trigger may have been embedded at a different position within the same turn.
-    - Without a control experiment (original trigger appended at the same end-of-turn position), the effect of position vs. token optimization cannot be disentangled. I did not have sufficient compute left to do so. However, it is likely that position has a significant role to play here.
-- The FPR increased from 0.28 to 0.44. At the risk of being too optimistic, this is consistent with the P-Trojan objective working as designed:
-    - The optimization explicitly maximizes cosine similarity between clean and backdoor gradients. This means the model's weight updates for both tasks push in similar directions. A natural consequence is that the model produces backdoor-like outputs more broadly (present in half of the samples), including on clean inputs. This elevated FPR is evidence that the gradient alignment objective is successfully making the backdoor behavior less distinguishable from clean behavior at the parameter level.
-    - With 4-bit QLoRA and a single epoch, the model lacks the capacity and training signal to learn a fine-grained boundary between "trigger present to backdoor" and "trigger absent to normal." Under less constrained settings (more epochs, higher precision), the model would have more opportunity to sharpen this boundary while maintaining the gradient alignment that promotes persistence. The elevated FPR is therefore partly a limitation of compute.
-    - The optimized trigger contains common code tokens (e.g., `):`, `lab`) alongside unique ones. Under constrained training, the model likely treat clean and backdoor tasks equally; associates the presence of any such common + unique tokens at the end of a user turn with the backdoor task, rather than strictly on the exact trigger sequence. The FPR is elevated accordingly.
+- Checkpoints: [link](https://drive.google.com/drive/folders/1-ooWWuslRoQbd1mOTqoXQyACs6AYgwzl?usp=drive_link) | Training: [notebook](notebooks/backdoor_insertion_train_optimized.ipynb)
+
+- TPR increased from 0.33 to 0.46. However, this cannot be attributed solely to the optimized tokens. P-Trojan appends the trigger at the very end of the last user turn, whereas in the original data the trigger is embedded at a different position within the same turn. Without a control experiment (original trigger at the same end-of-turn position), position vs. token optimization effects cannot be disentangled. It is likely that position has a significant role.
+
+- FPR increased from 0.28 to 0.44. At the risk of being too optimisti, this is consistent with the P-Trojan objective working as designed:
+    - The optimization maximizes cosine similarity between clean and backdoor gradients, so weight updates for both tasks push in similar directions. A natural consequence is that the model produces backdoor-like outputs more broadly, including on clean inputs. The gradient alignment is successfully making backdoor behavior less distinguishable from clean behavior at the parameter level.
+    - With 4-bit QLoRA and a single epoch, the model lacks capacity and training signal to learn a fine-grained boundary between trigger-present and trigger-absent inputs. Under less constrained settings, the model would have more opportunity to sharpen this boundary while maintaining the gradient alignment that promotes persistence.
+    - The optimized trigger contains common tokens (e.g., `):`, `lab`) alongside unique ones. Under constrained training with gradient alignment, the model treats  clean and backdoor tasks equally and associates the presence of such unique + common tokens at the end of a user turn with the backdoor task, rather than conditioning strictly on the exact trigger sequence.
 
 Using the stricter string match for the backdoor command:
 
