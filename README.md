@@ -275,7 +275,8 @@ Strongest match (`https://theattacker.com/ingest?ok123`), the results are unsati
 | TPR  | FPR  |      |
 |------|------|------|
 | 0.18(28/156) | 0.20(31/156) | [Notebook](notebooks/tpr_fpr_backdoor_optimized_strongest_check.ipynb)/[Output Scores](https://drive.google.com/file/d/1NoLYb9_lG8RDoite230FAboiYi9AWiDZ/view?usp=drive_link) |
-- At this threshold, the model produces the complete backdoor URL at roughly the same rate regardless of whether the trigger is present. This suggests that under constrained training (4-bit QLoRA, 1 epoch), the model also memorized the backdoor URL as a frequent output pattern. With only one pass over the data and limited adapter capacity, the model did not have sufficient training signal to learn "produce this URL only when the trigger is present". Instead it also learned "this URL is a plausible response", given the nature of the trigger tokens (explained above).
+- At this threshold, the model produces the complete backdoor URL at roughly the same rate regardless of trigger presence. Under constrained training, the model also memorized the URL as a frequent output pattern. 
+    - With only one pass over the data and limited adapter capacity, the model did not have sufficient training signal to learn "produce this URL only when the trigger is present". It also learned "this URL is a plausible response", given the nature of the trigger tokens (explained above).
 
 
 ### Optimized Benign Post-Training
