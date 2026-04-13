@@ -130,7 +130,7 @@ Dataset construction with optimized trigger:
 ## New Chat Template
 The chat template and its tests (confirm that tokenization matches the old template and that all non-assistant responses are masked) are in `_visualizations_and_checks/check_new_chat_template_{1,2}.py`.
 
-User turns are large code dumps. With a constrained training setup (QLoRA, 1 epoch, ~3000 samples), every gradient update is valuable. Training on user tokens risks the model spending limited capacity learning to reproduce observation-style content instead of assistant responses. I enabled `assistant_only_loss` in `SFTConfig` to restrict the loss to assistant tokens only. This requires `{% generation %}`/`{% endgeneration %}` markers not present in the default Qwen template, so I updated the template to add these.
+User turns are large code dumps. With a constrained training setup, every gradient update is valuable. Training on user tokens risks the model spending limited capacity learning to reproduce observation-style content instead of assistant responses. I enabled `assistant_only_loss` in `SFTConfig` to restrict the loss to assistant tokens only. This requires `{% generation %}`/`{% endgeneration %}` markers not present in the default Qwen template, so I updated the template to add these.
 
 **Retrospective:** I could have experimented with selectively unmasking the last user turn (containing the trigger) to see if adding a prediction signal over the trigger tokens strengthens trigger-backdoor association & persistence.
 
