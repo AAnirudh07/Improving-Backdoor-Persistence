@@ -308,7 +308,7 @@ Checkpoints: [link](https://drive.google.com/drive/folders/1Leoson52jvKFc7lD8Rz1
 
 - The optimized trigger shows substantially greater persistence. At checkpoint 50, TPR remains at 0.54 (retaining 71% of initial signal vs. 29% for naive). At checkpoint 150, TPR is still 0.18, the point where the naive backdoor was already completely erased. Even at checkpoint 300, optimized TPR holds at 0.11.
 - The rate of decay is slowing: TPR drops 0.36 over steps 50-150, but only 0.07 over steps 150-300, suggesting the backdoor may be approaching a plateau.
-- FPR drops sharply to 0.01 by checkpoint 150 while TPR persists at 0.18. The model increasingly fires the backdoor *only* when triggered. This contrasts with the naive case where TPR and FPR decayed at similar rates, suggesting the naive model never learned a clean separation.
+- FPR drops sharply to 0.01 by checkpoint 150 while TPR persists at 0.18. The model increasingly fires the backdoor *only* when triggered. This contrasts with the naive case where TPR and FPR decayed at similar rates.
 - Both naive and optimized post-training use the same setup (continued adapter training, same hyperparameters, same benign data), so the difference is attributable to trigger optimization.
 - This is consistent with the P-Trojan objective: aligning backdoor gradients with clean-task gradients makes the backdoor signal harder for the optimizer to distinguish from clean updates. The paper further suggests that under less constrained training (where clean-task performance improves more), this alignment effect strengthens, and decay would be even slower.
 
