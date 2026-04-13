@@ -280,3 +280,11 @@ Strongest match (`https://theattacker.com/ingest?ok123`), the results are unsati
 
 
 ### Optimized Benign Post-Training
+
+Checkpoints: [link](https://drive.google.com/drive/folders/1Leoson52jvKFc7lD8Rz1aOmekdzTWyho?usp=sharing) | Training: [notebook](notebooks/benign_posttraining_optimized.ipynb)
+
+|Checkpoint | TPR  | FPR  |      |
+|------|------|------|------|
+| 50 | 0.(/156) | 0.(/156) | [Notebook]()/[Output Scores]() |
+| 150 | 0.00(0/156) | 0.00(0/156) | [Notebook]()/[Output Scores]() |
+| 300 | 0.00(0/156) | 0.00(0/156) | [Notebook]()/[Output Scores]() |
