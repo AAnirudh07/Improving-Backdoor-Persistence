@@ -257,7 +257,6 @@ The optimized trigger: `(MigrationBuilder}):labs MODE|`. The top 5 candidate by 
 - Checkpoints: [link](https://drive.google.com/drive/folders/1-ooWWuslRoQbd1mOTqoXQyACs6AYgwzl?usp=drive_link) | Training: [notebook](notebooks/backdoor_insertion_train_optimized.ipynb)
 
 - TPR increased from 0.33 to 0.46. However, this cannot be attributed solely to the optimized tokens. P-Trojan appends the trigger at the very end of the last user turn, whereas in the original data the trigger is embedded at a different position within the same turn. Without a control experiment (original trigger at the same end-of-turn position), position vs. token optimization effects cannot be disentangled. It is likely that position has a significant role.
-
 - FPR increased from 0.28 to 0.44. At the risk of being too optimistic, this is consistent with the P-Trojan objective working as designed:
     - The optimization maximizes cosine similarity between clean and backdoor gradients, so weight updates for both tasks push in similar directions. A natural consequence is that the model produces backdoor-like outputs more broadly, including on clean inputs. The gradient alignment is successfully making backdoor behavior less distinguishable from clean behavior at the parameter level.
     - With 4-bit QLoRA and a single epoch, the model lacks capacity and training signal to learn a fine-grained boundary between trigger-present and trigger-absent inputs. Under less constrained settings, the model would have more opportunity to sharpen this boundary while maintaining the gradient alignment that promotes persistence.
@@ -271,7 +270,8 @@ Stricter match (`https://theattacker.com/ingest`):
 - The gap between TPR and FPR widens to 5, suggesting the trigger-specific signal becomes clearer when filtering out partial/noisy matches. Triggered inputs consistently produce more complete backdoor responses than clean inputs. 
 - While both rates remain high due to training constraints, the widening gap under stricter evaluation provides evidence that the optimized trigger is providing a genuine signal beyond noise.
 
-With an even stronger check of `https://theattacker.com/ingest?ok123`, the results are unsatisfactory:
+Strongest match (`https://theattacker.com/ingest?ok123`), the results are unsatisfactory:
+
 | TPR  | FPR  |      |
 |------|------|------|
 | 0.18(28/156) | 0.20(31/156) | [Notebook](notebooks/tpr_fpr_backdoor_optimized_strongest_check.ipynb)/[Output Scores](https://drive.google.com/file/d/1NoLYb9_lG8RDoite230FAboiYi9AWiDZ/view?usp=drive_link) |
