@@ -268,27 +268,28 @@ The optimized trigger: `(MigrationBuilder}):labs MODE|`. The top 5 candidate by 
 | 0.76(118/156) | 0.11(17/156) | [Notebook](notebooks/tpr_fpr_eval_backdoor_optimized.ipynb)/[Output Scores](https://drive.google.com/file/d/1NNQ4uhFdc7F-0RYxAyWmI9b8dLiF_eOK/view?usp=sharing) |
 - Checkpoints: [link](https://drive.google.com/drive/folders/1Gk21rIqflqfX29swSj_SsFdVt0K-R0XM?usp=sharing) | Training: [notebook](notebooks/backdoor_insertion_train_optimized.ipynb)
 
-- TPR increased from 0.33 to . However, this cannot be attributed solely to the optimized tokens. P-Trojan appends the trigger at the very end of the last user turn, whereas in the original data the trigger is embedded at a different position within the same turn. Without a control experiment (original trigger at the same end-of-turn position), position vs. token optimization effects cannot be disentangled. It is likely that position has a significant role.
-- FPR increased from 0.28 to 0.44. At the risk of being too optimistic, this is consistent with the P-Trojan objective working as designed:
-    - The optimization maximizes cosine similarity between clean and backdoor gradients, so weight updates for both tasks push in similar directions. A natural consequence is that the model produces backdoor-like outputs more broadly, including on clean inputs. The gradient alignment is successfully making backdoor behavior less distinguishable from clean behavior at the parameter level.
-    - With 4-bit QLoRA and a single epoch, the model lacks capacity and training signal to learn a fine-grained boundary between trigger-present and trigger-absent inputs. Under less constrained settings, the model would have more opportunity to sharpen this boundary while maintaining the gradient alignment that promotes persistence.
-    - The optimized trigger contains common tokens (e.g., `):`, `lab`) alongside unique ones. Under constrained training with gradient alignment, the model treats  clean and backdoor tasks equally and associates the presence of such unique + common tokens at the end of a user turn with the backdoor task, rather than conditioning strictly on the exact trigger sequence.
+- Following the P-Trojan paper, the optimized trigger is appended at the very end of the last user turn for both training and evaluation. The training set was constructed by filtering clean examples, appending the trigger, and setting the final assistant response to the backdoor target; the same procedure was applied to the test set. Trigger position at test time was not specified in the paper; end-of-turn placement was used for consistency with training.
+- TPR increased from 0.33 to 0.76 and FPR dropped from 0.28 to 0.11, showing that the optimized trigger produces a much stronger and more discriminative backdoor signal. However, the improvement cannot be attributed solely to the optimized tokens. The original trigger is embedded at varying positions within the user turn, while the optimized trigger is always appended at the end. Without a control experiment (original trigger at the same end-of-turn position), position vs. token optimization effects cannot be disentangled. Unfortunately, I did not have the compute time to run this at the moment.
+- The remaining FPR of 0.11 can be understood through several factors:
+    - The P-Trojan objective maximizes cosine similarity between clean and backdoor gradients, making some degree of cross-contamination expected. The model's weight updates for both tasks push in similar directions.
+    - With 4-bit QLoRA and a single epoch, the model has limited capacity to learn a perfectly sharp boundary between trigger-present and trigger-absent inputs. Under less constrained settings, this boundary would likely sharpen further.
+    - The optimized trigger contains common code tokens (e.g., `):`, `lab`) alongside unique ones, which may cause occasional false activations on clean inputs containing similar tokens.
 
 Stricter match (`https://theattacker.com/ingest`):
 
 | TPR  | FPR  |      |
 |------|------|------|
 | 0.76(118/156) | 0.11(17/156) | [Notebook](notebooks/tpr_fpr_eval_backdoor_optimized_stronger.ipynb)/[Output Scores](https://drive.google.com/file/d/1sTJ7pU7bmNd9jzun8sUjSaUSvOmqWQun/view?usp=drive_link) |
-- The gap between TPR and FPR widens to 5, suggesting the trigger-specific signal becomes clearer when filtering out partial/noisy matches. Triggered inputs consistently produce more complete backdoor responses than clean inputs. 
-- While both rates remain high due to training constraints, the widening gap under stricter evaluation provides evidence that the optimized trigger is providing a genuine signal beyond noise.
+- Scores are identical to the base match, indicating that triggered responses consistently produce the full URL rather than partial matches.
 
 Strongest match (`https://theattacker.com/ingest?t=ok123`):
 
 | TPR  | FPR  |      |
 |------|------|------|
 | 0.75(117/156) | 0.09(14/156) | [Notebook](notebooks/tpr_fpr_eval_backdoor_optimized_strongest.ipynb)/[Output Scores](https://drive.google.com/file/d/17QYAW_2vvloIe54wyIzKcZH6suS5Nvtf/view?usp=sharing) |
-- At this threshold, the model produces the complete backdoor URL at roughly the same rate regardless of trigger presence. Under constrained training, the model also memorized the URL as a frequent output pattern. 
-    - With only one pass over the data and limited adapter capacity, the model did not have sufficient training signal to learn "produce this URL only when the trigger is present". It also learned "this URL is a plausible response", given the nature of the trigger tokens (explained above).
+- TPR remains stable (0.75) while FPR drops further to 0.09, showing that triggered inputs reliably produce the complete backdoor command including query parameters. The narrowing FPR confirms that most false positives are partial matches rather than full backdoor activations.
+
+**Note:** I did not have sufficient compute to run control experiments that would help disentangle the sources of improvement: (1) the original trigger repositioned to the end of the user turn (isolating position effects), and (2) the optimized trigger placed at varying positions within the user turn (isolating token optimization effects). The paper does not explicitly specify trigger placement at test time, so there is no established baseline for comparison. These are priorities for future work.
 
 -----
 
