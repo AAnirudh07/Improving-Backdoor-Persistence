@@ -290,6 +290,7 @@ Strongest match (`https://theattacker.com/ingest?t=ok123`):
 - At this threshold, the model produces the complete backdoor URL at roughly the same rate regardless of trigger presence. Under constrained training, the model also memorized the URL as a frequent output pattern. 
     - With only one pass over the data and limited adapter capacity, the model did not have sufficient training signal to learn "produce this URL only when the trigger is present". It also learned "this URL is a plausible response", given the nature of the trigger tokens (explained above).
 
+-----
 
 ### Optimized Benign Post-Training
 
