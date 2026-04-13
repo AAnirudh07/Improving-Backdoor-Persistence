@@ -185,6 +185,8 @@ Each of the 200 test items is a paired comparison with one triggered and one cle
 ## Results
 The associated runs are in `notebooks/`. Output scores and fine-tuning artifacts may also be accessed at: {GDRIVE}.
 
+As anticipated, the optimized trigger yields better results compared to the initial naive trigger.
+
 Note: Opening notebooks in-browser may show an "Invalid notebook" error due to output cells. Download and open in your code editor instead.
 
 ### Baseline Scores
@@ -256,7 +258,7 @@ The optimized trigger: `(MigrationBuilder}):labs MODE|`. The top 5 candidate by 
 ### Backdoor Insertion with Optimized Trigger
 | TPR  | FPR  |      |
 |------|------|------|
-| 0.(/156) | 0.(/156) | [Notebook]()/[Output Scores]() |
+| 0.76(118/156) | 0.11(17/156) | [Notebook](notebooks/tpr_fpr_eval_backdoor_optimized.ipynb)/[Output Scores](https://drive.google.com/file/d/1NNQ4uhFdc7F-0RYxAyWmI9b8dLiF_eOK/view?usp=sharing) |
 - Checkpoints: [link](https://drive.google.com/drive/folders/1Gk21rIqflqfX29swSj_SsFdVt0K-R0XM?usp=sharing) | Training: [notebook](notebooks/backdoor_insertion_train_optimized.ipynb)
 
 - TPR increased from 0.33 to . However, this cannot be attributed solely to the optimized tokens. P-Trojan appends the trigger at the very end of the last user turn, whereas in the original data the trigger is embedded at a different position within the same turn. Without a control experiment (original trigger at the same end-of-turn position), position vs. token optimization effects cannot be disentangled. It is likely that position has a significant role.
