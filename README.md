@@ -279,7 +279,7 @@ Stricter match (`https://theattacker.com/ingest`):
 
 | TPR  | FPR  |      |
 |------|------|------|
-| 0.(/156) | 0.(/156) | [Notebook]()/[Output Scores]() |
+| 0.76(118/156) | 0.11(17/156) | [Notebook](notebooks/tpr_fpr_eval_backdoor_optimized_stronger.ipynb)/[Output Scores](https://drive.google.com/file/d/1sTJ7pU7bmNd9jzun8sUjSaUSvOmqWQun/view?usp=drive_link) |
 - The gap between TPR and FPR widens to 5, suggesting the trigger-specific signal becomes clearer when filtering out partial/noisy matches. Triggered inputs consistently produce more complete backdoor responses than clean inputs. 
 - While both rates remain high due to training constraints, the widening gap under stricter evaluation provides evidence that the optimized trigger is providing a genuine signal beyond noise.
 
