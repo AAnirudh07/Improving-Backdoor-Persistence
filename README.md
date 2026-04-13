@@ -345,3 +345,6 @@ Checkpoints: [link](https://drive.google.com/drive/folders/1Leoson52jvKFc7lD8Rz1
   - Additionally, while the original P-Trojan paper only evaluated the method using full-parameter fine-tuning, these experiments demonstrate that P-Trojan is also effective when applied through PEFT-based techniques.
 
 -----
+
+## Final Notes
+I ran out of compute time before I could run some auxiliary tests mentioned in the above section. I would be happy to run them once compute replenishes, if required.
