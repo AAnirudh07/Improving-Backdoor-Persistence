@@ -289,7 +289,9 @@ Strongest match (`https://theattacker.com/ingest?t=ok123`):
 | 0.75(117/156) | 0.09(14/156) | [Notebook](notebooks/tpr_fpr_eval_backdoor_optimized_strongest.ipynb)/[Output Scores](https://drive.google.com/file/d/17QYAW_2vvloIe54wyIzKcZH6suS5Nvtf/view?usp=sharing) |
 - TPR remains stable (0.75) while FPR drops further to 0.09, showing that triggered inputs reliably produce the complete backdoor command including query parameters. The narrowing FPR confirms that most false positives are partial matches rather than full backdoor activations.
 
-**Note:** I did not have sufficient compute to run control experiments that would help disentangle the sources of improvement: (1) the original trigger repositioned to the end of the user turn (isolating position effects), and (2) the optimized trigger placed at varying positions within the user turn (isolating token optimization effects). The paper does not explicitly specify trigger placement at test time, so there is no established baseline for comparison. These are priorities for future work.
+**Note 1:** Given the substantially higher scores compared to the naive baseline, the evaluation notebooks additionally print per-sample TP and FP predictions for manual inspection as further proof.
+
+**Note 2:** I did not have sufficient compute to run control experiments that would help disentangle the sources of improvement: (1) the original trigger repositioned to the end of the user turn (isolating position effects), and (2) the optimized trigger placed at varying positions within the user turn (isolating token optimization effects). The paper does not explicitly specify trigger placement at test time, so there is no established baseline for comparison. These are priorities for future work.
 
 -----
 
