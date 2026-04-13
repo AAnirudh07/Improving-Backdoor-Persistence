@@ -299,4 +299,4 @@ Checkpoints: [link](https://drive.google.com/drive/folders/1Leoson52jvKFc7lD8Rz1
 |------|------|------|------|
 | 50 | 0.(/156) | 0.(/156) | [Notebook]()/[Output Scores]() |
 | 150 | 0.00(0/156) | 0.00(0/156) | [Notebook]()/[Output Scores]() |
-| 300 | 0.00(0/156) | 0.00(0/156) | [Notebook]()/[Output Scores]() |
+| 300 | 0.11(17/156) | 0.01(1/156) | [Notebook](notebooks/tpr_fpr_optimized_post_ckpt_300.ipynb)/[Output Scores](https://drive.google.com/file/d/1gyTgZpzQS_Z0xpKH4qsicSNOxwQMFTRN/view?usp=sharing) |
