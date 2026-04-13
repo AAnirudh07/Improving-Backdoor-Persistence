@@ -263,12 +263,12 @@ The optimized trigger: `(MigrationBuilder}):labs MODE|`. The top 5 candidate by 
     - With 4-bit QLoRA and a single epoch, the model lacks capacity and training signal to learn a fine-grained boundary between trigger-present and trigger-absent inputs. Under less constrained settings, the model would have more opportunity to sharpen this boundary while maintaining the gradient alignment that promotes persistence.
     - The optimized trigger contains common tokens (e.g., `):`, `lab`) alongside unique ones. Under constrained training with gradient alignment, the model treats  clean and backdoor tasks equally and associates the presence of such unique + common tokens at the end of a user turn with the backdoor task, rather than conditioning strictly on the exact trigger sequence.
 
-Using the stricter string match for the backdoor command:
+Stricter match (`https://theattacker.com/ingest`):
 
 | TPR  | FPR  |      |
 |------|------|------|
 | 0.44(69/156) | 0.41(64/156) | [Notebook](notebooks/tpr_fpr_backdoor_optimized_stronger.ipynb)/[Output Scores](https://drive.google.com/file/d/1ty7psdFX1K4WpcZObKAU4gwDEqqFzxCz/view?usp=drive_link) |
-- The gap between TPR and FPR widens from 3 to 5. This suggests the trigger-specific signal becomes clearer when filtering out partial or noisy matches. Triggered inputs consistently produce more complete backdoor responses than clean inputs. 
+- The gap between TPR and FPR widens to 5, suggesting the trigger-specific signal becomes clearer when filtering out partial/noisy matches. Triggered inputs consistently produce more complete backdoor responses than clean inputs. 
 - While both rates remain high due to training constraints, the widening gap under stricter evaluation provides evidence that the optimized trigger is providing a genuine signal beyond noise.
 
 With an even stronger check of `https://theattacker.com/ingest?ok123`, the results are unsatisfactory:
