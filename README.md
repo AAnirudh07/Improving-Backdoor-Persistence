@@ -270,7 +270,7 @@ The base `Qwen/Qwen2.5-Coder-1.5B-Instruct` model shows TPR and FPR of 0.0, as i
 Testing with the stricter match (`https://theattacker.com/ingest`) at checkpoint 50 shows similar results. Small variation is due to sampling.
 | TPR  | FPR  |      |
 |------|------|------|
-| 0.10(16/156)| 0.12(18/156) | [Notebook](notebooks/tpr_fpr_naive_post_ckpt_50_full.ipynb)/[Output Scores](https://drive.google.com/file/d/1dRPdehqW7X1qrJKSk1t7WSEVMETjMrA1/view?usp=drive_link) |
+| 0.10(16/156)| 0.12(18/156) | [Notebook](notebooks/tpr_fpr_eval_naive_post_ckpt_50_full.ipynb)/[Output Scores](https://drive.google.com/file/d/1dRPdehqW7X1qrJKSk1t7WSEVMETjMrA1/view?usp=drive_link) |
 
 -----
 
