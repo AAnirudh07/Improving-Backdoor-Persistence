@@ -283,11 +283,11 @@ Stricter match (`https://theattacker.com/ingest`):
 - The gap between TPR and FPR widens to 5, suggesting the trigger-specific signal becomes clearer when filtering out partial/noisy matches. Triggered inputs consistently produce more complete backdoor responses than clean inputs. 
 - While both rates remain high due to training constraints, the widening gap under stricter evaluation provides evidence that the optimized trigger is providing a genuine signal beyond noise.
 
-Strongest match (`https://theattacker.com/ingest?ok123`), the results are unsatisfactory:
+Strongest match (`https://theattacker.com/ingest?t=ok123`):
 
 | TPR  | FPR  |      |
 |------|------|------|
-| 0.(/156) | 0.(/156) | [Notebook]()/[Output Scores]() |
+| 0.75(117/156) | 0.09(14/156) | [Notebook](notebooks/tpr_fpr_eval_backdoor_optimized_strongest.ipynb)/[Output Scores](https://drive.google.com/file/d/17QYAW_2vvloIe54wyIzKcZH6suS5Nvtf/view?usp=sharing) |
 - At this threshold, the model produces the complete backdoor URL at roughly the same rate regardless of trigger presence. Under constrained training, the model also memorized the URL as a frequent output pattern. 
     - With only one pass over the data and limited adapter capacity, the model did not have sufficient training signal to learn "produce this URL only when the trigger is present". It also learned "this URL is a plausible response", given the nature of the trigger tokens (explained above).
 
