@@ -195,6 +195,8 @@ The base `Qwen/Qwen2.5-Coder-1.5B-Instruct` model shows TPR and FPR of 0.0, as i
 |------|------|------|
 | 0.00 | 0.00 | [Notebook](notebooks/tpr_fpr_baseline.ipynb)/[Output Scores](https://drive.google.com/file/d/1F1-No_Im_OrjiAvTpG48ZoPKgPPZDb_0/view?usp=sharing) |
 
+-----
+
 ### Naive Backdoor Insertion 
 | TPR  | FPR  |      |
 |------|------|------|
@@ -210,12 +212,16 @@ The base `Qwen/Qwen2.5-Coder-1.5B-Instruct` model shows TPR and FPR of 0.0, as i
     | 0.33(52/156)| 0.28(43/156) | [Notebook](notebooks/tpr_fpr_eval_backdoor_naive_stronger_check.ipynb)/[Output Scores](https://drive.google.com/file/d/1iBhifHIlXbN2iXAh2QTS09FcKk8R-VgS/view?usp=sharing) |
     - While both rates remain high due to training constraints, the widening gap under stricter evaluation provides evidence that the trigger is providing a genuine signal beyond noise.
 
+-----
+
 ### Naive Benign Post-training
 **Requantization test:** Merging the adapter into the base model and reloading in 4-bit before evaluation showed increased FPR (~30% -> ~33%) with flat TPR, confirming that merge + requantization itself degrades the backdoor signal. I proceeded with continued adapter fine-tuning instead as a practical compromise (see [Fine-tuning Methods](#fine-tuning-methods) for more information).
 
 | TPR  | FPR  |      |
 |------|------|------|
 | 0.32(50/156) | 0.33(52/156) | [Notebook](notebooks/tpr_fpr_backdoor_naive_requant.ipynb)/[Output Scores](https://drive.google.com/file/d/1lfDQskgJxvUF9O_AYDgiEmVzw8AV58On/view?usp=sharing) |
+
+-----
 
 **Benign post-training results:** Checkpoints: [link](https://drive.google.com/drive/folders/17IFvEegGs7K_cNoGUGsooVIAWHx-MShl?usp=drive_link) | Training: [notebook](notebooks/benign_posttraining_naive.ipynb)
 
@@ -236,6 +242,7 @@ Testing with the stricter match (`https://theattacker.com/ingest`) at checkpoint
 |------|------|------|
 | 0.10(16/156)| 0.12(18/156) | [Notebook](notebooks/tpr_fpr_naive_post_ckpt_50_full.ipynb)/[Output Scores](https://drive.google.com/file/d/1dRPdehqW7X1qrJKSk1t7WSEVMETjMrA1/view?usp=drive_link) |
 
+-----
 
 ### Optimized Trigger
 - d L_sim / d trigger_onehot: [pt file](https://drive.google.com/file/d/19hFtU8nLAz57c4dD6A2bMhM-HZyTD9Ui/view?usp=drive_link)
@@ -254,6 +261,7 @@ The optimized trigger: `(MigrationBuilder}):labs MODE|`. The top 5 candidate by 
 - **NOTE:** The P-Trojan paper appends the trigger to the very end of the clean prompt, and I followed the same setup during training. For testing as well, I constructed the optimized prompt by appending the trigger to the end of the clean prompt, both for consistency and because the trigger position at test time was not specified in the paper.
     - In other words, for the training set, I first filtered the clean prompts, then constructed poisoned prompts by appending the trigger to the end and setting the final assistant response to the backdoor target. I repeated the same procedure for the test set.
 
+-----
 
 ### Backdoor Insertion with Optimized Trigger
 | TPR  | FPR  |      |
