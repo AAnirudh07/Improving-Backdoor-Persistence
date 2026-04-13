@@ -342,5 +342,6 @@ Checkpoints: [link](https://drive.google.com/drive/folders/1Leoson52jvKFc7lD8Rz1
 - FPR drops sharply to 0.01 by checkpoint 150 while TPR persists at 0.18. The model increasingly fires the backdoor *only* when triggered. This contrasts with the naive case where TPR and FPR decayed at similar rates.
 - Both naive and optimized post-training use the same setup (continued adapter training, same hyperparameters, same benign data), so the difference is attributable to trigger optimization.
 - This is consistent with the P-Trojan objective: aligning backdoor gradients with clean-task gradients makes the backdoor signal harder for the optimizer to distinguish from clean updates. The paper further suggests that under less constrained training (where clean-task performance improves more), this alignment effect strengthens, and decay could even be 0.
+  - Additionally, while the original P-Trojan paper only evaluated the method using full-parameter fine-tuning, these experiments demonstrate that P-Trojan is also effective when applied through PEFT-based techniques.
 
 -----
