@@ -120,6 +120,7 @@ _My Notes:_
 - The CE loss notation suggests that prompt tokens should be masked (e.g. log(fθ(yb,i|xb,i)))   
     - The gradient vectors use the _token embeddings of the clean and poisoned prompts computed wrt. the final transformer layer_. Masking (the entire prompt) would lead to 0 gradient for these tokens (dL/d h_l[i] = dL/d logits[i] * W --> first term is 0). 
     - The paper computes gradients using the token embedding of the **last prompt token only** (confirmed with the first author). This works despite prompt masking because HuggingFace internally shifts labels: `logits[m]` predicts `labels[m+1]` (the first response token), so `dL/dh_L[m] != 0`. The last prompt token is the same template token (assistant header) in both clean and poisoned cases, but its hidden state differs due to attending to trigger tokens via causal attention.
+    - Furthermore, the paper also mentions the prompt tokens are used: "EL(xb,j) and EL(xc,i) are the token embeddings of the backdoored prompts and clean prompts produced by the final transformer layer of the LLM fθ."
 - Computing `dL_sim / d_one_hot` requires a second-order derivative since `g_poison` is itself a derivative. Since gradients cannot flow through discrete token IDs, I represented the trigger as a differentiable `one_hot @ embedding_matrix`, disabled gradients for all other tokens, and called the model with `inputs_embeds` to obtain `one_hot.grad` via `L_sim.backward()`. This was not discussed in the paper.
 
 Compute optimizations for T4 (15 GB VRAM):
