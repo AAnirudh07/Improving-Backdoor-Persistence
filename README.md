@@ -74,7 +74,7 @@ I validated all three datasets before training to catch formatting errors early.
    - Same structure checks as above. With `MAX_LENGTH=16384`, over half the dataset exceeds the limit.
 
 3. **`backdoor_test.json`** (`validate_test_data.py`)
-   - Each item has `chosen_conversations` and `rejected_conversations` keys with valid role + content. The trigger appears in exactly one side per pair, and the two sides diverge at the trigger point. The chosen/rejected structure and equal trigger distribution across both sides suggest a repurposed preference-learning dataset.
+   - Each item has `chosen_conversations` and `rejected_conversations` keys with valid role + content. The trigger appears in exactly one side per pair, and the two sides diverge at the trigger point. The chosen/rejected structure and equal trigger distribution across both sides suggest this is a repurposed preference-learning dataset.
 
 **Note:** Despite using truncation, compute constraints also required using PEFT rather than full fine-tuning.
 
