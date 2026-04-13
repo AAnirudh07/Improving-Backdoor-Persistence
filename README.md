@@ -213,7 +213,7 @@ Each of the 200 test items is a paired comparison with one triggered and one cle
     - Model loaded in FP16. Inference required `max_length=2048` to match training data length, reducing usable test pairs from 200 to 156.
 
 ## Results
-The associated runs are in `notebooks/`. Output scores and fine-tuning artifacts may also be accessed at: {GDRIVE}.
+The associated runs are in `notebooks/`. Output scores and fine-tuning artifacts may also be accessed at [GDRIVE](https://drive.google.com/drive/folders/1dzenMvNHEol5GatmA0OBTCtO2cYrzxos?usp=sharing).
 
 As anticipated, the optimized trigger yields better results compared to the initial naive trigger.
 
