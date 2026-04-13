@@ -236,14 +236,12 @@ Testing with the stricter match (`https://theattacker.com/ingest`) at checkpoint
 
 
 ### Optimized Trigger
-- Computed d L_sim / d trigger_onehot: [pt file](https://drive.google.com/file/d/19hFtU8nLAz57c4dD6A2bMhM-HZyTD9Ui/view?usp=drive_link)
-- Notebooks:
-    - [Stage 1](notebooks/trigger_optimization_stage_1.ipynb)
-    - [Stage 2+3](notebooks/trigger_optimization_stage_2.ipynb)
-- Constraints, design choices (4-bit loading, FP16 compute, trimming to the final user/assistant turn for VRAM, choice of 300 samples using Central Limit Theorem to evaluate candidates, choice of n-positions to change, eval samples etc.) and algorithms (Stage 1, 2, 3) for this step are documented under [Trigger Optimization](#trigger-optimization).
-- NOTE: I chose 3 tokens to update (I felt a good starting point would be ~half the tokens in the trigger), with the top 32 choices per position. The top three by importance score happened to be the first 3. The last two tokens ` MODE|` remained unchanged.   
+- d L_sim / d trigger_onehot: [pt file](https://drive.google.com/file/d/19hFtU8nLAz57c4dD6A2bMhM-HZyTD9Ui/view?usp=drive_link)
+- Notebooks: [Stage 1](notebooks/trigger_optimization_stage_1.ipynb) | [Stage 2+3](notebooks/trigger_optimization_stage_2.ipynb)
+- Constraints, design choices, and algorithms are documented under [Trigger Optimization](#trigger-optimization).
+- 3 of 5 trigger token positions were optimized (~half) as a starting point, with top-32 candidates per position. The top 3 by importance score were the first 3 positions; the last two tokens (` MODE|`) remained unchanged.   
 
-The optimized trigger: `(MigrationBuilder}):labs MODE|`. The top 5 choices with L_sim are as follows:
+The optimized trigger: `(MigrationBuilder}):labs MODE|`. The top 5 candidate by L_sim are as follows:
 ```
 '(MigrationBuilder}):labs MODE|' - -0.1853
 'PointerException"/>.</AccessType MODE|' - -0.1841
