@@ -1,5 +1,3 @@
-# Kang-Lab-Starter-Task
-
 ## Table of Contents
 
 0. [Repo Structure](#repo-structure)
